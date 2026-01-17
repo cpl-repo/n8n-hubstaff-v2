@@ -30,21 +30,6 @@ export const memberOperations: INodeProperties[] = [
 ];
 
 export const memberFields: INodeProperties[] = [
-	// Common field
-	{
-		displayName: 'Organization ID',
-		name: 'organizationId',
-		type: 'string',
-		required: true,
-		displayOptions: {
-			show: {
-				resource: ['member'],
-			},
-		},
-		default: '',
-		description: 'The ID of the organization',
-	},
-
 	// Get
 	{
 		displayName: 'Member ID',

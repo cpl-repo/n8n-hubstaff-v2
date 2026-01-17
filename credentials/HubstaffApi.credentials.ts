@@ -19,6 +19,14 @@ export class HubstaffApi implements ICredentialType {
 			required: true,
 			description: 'Your Hubstaff Personal Access Token. Generate one at https://developer.hubstaff.com/',
 		},
+		{
+			displayName: 'Organization ID',
+			name: 'organizationId',
+			type: 'string',
+			default: '',
+			required: true,
+			description: 'Your Hubstaff Organization ID. Find it in your Hubstaff dashboard URL or via the API.',
+		},
 	];
 
 	authenticate: IAuthenticateGeneric = {

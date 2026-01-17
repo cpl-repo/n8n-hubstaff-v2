@@ -24,21 +24,6 @@ export const applicationOperations: INodeProperties[] = [
 ];
 
 export const applicationFields: INodeProperties[] = [
-	// Organization ID
-	{
-		displayName: 'Organization ID',
-		name: 'organizationId',
-		type: 'string',
-		required: true,
-		displayOptions: {
-			show: {
-				resource: ['application'],
-			},
-		},
-		default: '',
-		description: 'The ID of the organization',
-	},
-
 	// Start Date
 	{
 		displayName: 'Start Date',

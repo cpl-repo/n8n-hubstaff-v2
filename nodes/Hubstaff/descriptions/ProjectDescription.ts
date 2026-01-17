@@ -48,21 +48,6 @@ export const projectOperations: INodeProperties[] = [
 ];
 
 export const projectFields: INodeProperties[] = [
-	// Common field
-	{
-		displayName: 'Organization ID',
-		name: 'organizationId',
-		type: 'string',
-		required: true,
-		displayOptions: {
-			show: {
-				resource: ['project'],
-			},
-		},
-		default: '',
-		description: 'The ID of the organization',
-	},
-
 	// Get
 	{
 		displayName: 'Project ID',

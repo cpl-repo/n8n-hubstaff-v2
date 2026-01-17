@@ -48,21 +48,6 @@ export const todoOperations: INodeProperties[] = [
 ];
 
 export const todoFields: INodeProperties[] = [
-	// Organization ID
-	{
-		displayName: 'Organization ID',
-		name: 'organizationId',
-		type: 'string',
-		required: true,
-		displayOptions: {
-			show: {
-				resource: ['todo'],
-			},
-		},
-		default: '',
-		description: 'The ID of the organization',
-	},
-
 	// To-do ID for get, update, delete
 	{
 		displayName: 'To-Do ID',

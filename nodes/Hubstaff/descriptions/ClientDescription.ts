@@ -48,21 +48,6 @@ export const clientOperations: INodeProperties[] = [
 ];
 
 export const clientFields: INodeProperties[] = [
-	// Organization ID
-	{
-		displayName: 'Organization ID',
-		name: 'organizationId',
-		type: 'string',
-		required: true,
-		displayOptions: {
-			show: {
-				resource: ['client'],
-			},
-		},
-		default: '',
-		description: 'The ID of the organization',
-	},
-
 	// Client ID for get, update, delete
 	{
 		displayName: 'Client ID',

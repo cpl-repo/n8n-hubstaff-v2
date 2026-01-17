@@ -165,12 +165,15 @@ export class Hubstaff implements INodeType {
 		const resource = this.getNodeParameter('resource', 0);
 		const operation = this.getNodeParameter('operation', 0);
 
+		// Get organization ID from credentials
+		const credentials = await this.getCredentials('hubstaffApi');
+		const organizationId = credentials.organizationId as string;
+
 		for (let i = 0; i < items.length; i++) {
 			try {
 				// ==================== ORGANIZATION ====================
 				if (resource === 'organization') {
 					if (operation === 'get') {
-						const organizationId = this.getNodeParameter('organizationId', i) as string;
 						const endpoint = `/organizations/${organizationId}`;
 						const responseData = await hubstaffApiRequest.call(this, 'GET', endpoint);
 						returnData.push({ json: responseData });
@@ -184,14 +187,12 @@ export class Hubstaff implements INodeType {
 				// ==================== PROJECT ====================
 				else if (resource === 'project') {
 					if (operation === 'get') {
-						const organizationId = this.getNodeParameter('organizationId', i) as string;
-						const projectId = this.getNodeParameter('projectId', i) as string;
+							const projectId = this.getNodeParameter('projectId', i) as string;
 						const endpoint = `/organizations/${organizationId}/projects/${projectId}`;
 						const responseData = await hubstaffApiRequest.call(this, 'GET', endpoint);
 						returnData.push({ json: responseData });
 					} else if (operation === 'getAll') {
-						const organizationId = this.getNodeParameter('organizationId', i) as string;
-						const endpoint = `/organizations/${organizationId}/projects`;
+							const endpoint = `/organizations/${organizationId}/projects`;
 						const qs: IHubstaffQueryParameters = {};
 
 						const additionalFields = this.getNodeParameter('additionalFields', i, {}) as IAdditionalFields;
@@ -205,8 +206,7 @@ export class Hubstaff implements INodeType {
 						const responseData = await hubstaffApiRequest.call(this, 'GET', endpoint, {}, qs);
 						returnData.push({ json: responseData });
 					} else if (operation === 'create') {
-						const organizationId = this.getNodeParameter('organizationId', i) as string;
-						const name = this.getNodeParameter('name', i) as string;
+							const name = this.getNodeParameter('name', i) as string;
 						const endpoint = `/organizations/${organizationId}/projects`;
 
 						const body: IHubstaffProjectBody = { name };
@@ -222,8 +222,7 @@ export class Hubstaff implements INodeType {
 						const responseData = await hubstaffApiRequest.call(this, 'POST', endpoint, body);
 						returnData.push({ json: responseData });
 					} else if (operation === 'update') {
-						const organizationId = this.getNodeParameter('organizationId', i) as string;
-						const projectId = this.getNodeParameter('projectId', i) as string;
+							const projectId = this.getNodeParameter('projectId', i) as string;
 						const endpoint = `/organizations/${organizationId}/projects/${projectId}`;
 
 						const updateFields = this.getNodeParameter('updateFields', i, {}) as IUpdateFields;
@@ -242,8 +241,7 @@ export class Hubstaff implements INodeType {
 						const responseData = await hubstaffApiRequest.call(this, 'PUT', endpoint, body);
 						returnData.push({ json: responseData });
 					} else if (operation === 'delete') {
-						const organizationId = this.getNodeParameter('organizationId', i) as string;
-						const projectId = this.getNodeParameter('projectId', i) as string;
+							const projectId = this.getNodeParameter('projectId', i) as string;
 						const endpoint = `/organizations/${organizationId}/projects/${projectId}`;
 						await hubstaffApiRequest.call(this, 'DELETE', endpoint);
 						returnData.push({ json: { success: true, projectId, organizationId } });
@@ -253,8 +251,7 @@ export class Hubstaff implements INodeType {
 				// ==================== ACTIVITY ====================
 				else if (resource === 'activity') {
 					if (operation === 'getAll') {
-						const organizationId = this.getNodeParameter('organizationId', i) as string;
-						const startDate = this.getNodeParameter('startDate', i) as string;
+							const startDate = this.getNodeParameter('startDate', i) as string;
 						const stopDate = this.getNodeParameter('stopDate', i) as string;
 
 						const additionalFields = this.getNodeParameter('additionalFields', i, {}) as IAdditionalFields;
@@ -285,8 +282,7 @@ export class Hubstaff implements INodeType {
 				// ==================== TIME ENTRY ====================
 				else if (resource === 'timeEntry') {
 					if (operation === 'getAll') {
-						const organizationId = this.getNodeParameter('organizationId', i) as string;
-						const startDate = this.getNodeParameter('startDate', i) as string;
+							const startDate = this.getNodeParameter('startDate', i) as string;
 						const stopDate = this.getNodeParameter('stopDate', i) as string;
 						const endpoint = `/organizations/${organizationId}/time_entries`;
 
@@ -314,8 +310,7 @@ export class Hubstaff implements INodeType {
 				// ==================== MEMBER ====================
 				else if (resource === 'member') {
 					if (operation === 'getAll') {
-						const organizationId = this.getNodeParameter('organizationId', i) as string;
-						const endpoint = `/organizations/${organizationId}/members`;
+							const endpoint = `/organizations/${organizationId}/members`;
 
 						const qs: IHubstaffQueryParameters = {};
 						const additionalFields = this.getNodeParameter('additionalFields', i, {}) as IAdditionalFields;
@@ -330,8 +325,7 @@ export class Hubstaff implements INodeType {
 						const responseData = await hubstaffApiRequest.call(this, 'GET', endpoint, {}, qs);
 						returnData.push({ json: responseData });
 					} else if (operation === 'get') {
-						const organizationId = this.getNodeParameter('organizationId', i) as string;
-						const memberId = this.getNodeParameter('memberId', i) as string;
+							const memberId = this.getNodeParameter('memberId', i) as string;
 						const endpoint = `/organizations/${organizationId}/members/${memberId}`;
 						const responseData = await hubstaffApiRequest.call(this, 'GET', endpoint);
 						returnData.push({ json: responseData });
@@ -350,8 +344,7 @@ export class Hubstaff implements INodeType {
 						const responseData = await hubstaffApiRequest.call(this, 'GET', endpoint);
 						returnData.push({ json: responseData });
 					} else if (operation === 'getAll') {
-						const organizationId = this.getNodeParameter('organizationId', i) as string;
-						const endpoint = `/organizations/${organizationId}/members`;
+							const endpoint = `/organizations/${organizationId}/members`;
 
 						const qs: IHubstaffQueryParameters = {};
 						const additionalFields = this.getNodeParameter('additionalFields', i, {}) as IAdditionalFields;
@@ -371,14 +364,12 @@ export class Hubstaff implements INodeType {
 				// ==================== TASK ====================
 				else if (resource === 'task') {
 					if (operation === 'get') {
-						const organizationId = this.getNodeParameter('organizationId', i) as string;
-						const taskId = this.getNodeParameter('taskId', i) as string;
+							const taskId = this.getNodeParameter('taskId', i) as string;
 						const endpoint = `/organizations/${organizationId}/tasks/${taskId}`;
 						const responseData = await hubstaffApiRequest.call(this, 'GET', endpoint);
 						returnData.push({ json: responseData });
 					} else if (operation === 'getAll') {
-						const organizationId = this.getNodeParameter('organizationId', i) as string;
-						const projectId = this.getNodeParameter('projectId', i) as string;
+							const projectId = this.getNodeParameter('projectId', i) as string;
 						const endpoint = `/organizations/${organizationId}/projects/${projectId}/tasks`;
 
 						const qs: IHubstaffQueryParameters = {};
@@ -397,8 +388,7 @@ export class Hubstaff implements INodeType {
 						const responseData = await hubstaffApiRequest.call(this, 'GET', endpoint, {}, qs);
 						returnData.push({ json: responseData });
 					} else if (operation === 'create') {
-						const organizationId = this.getNodeParameter('organizationId', i) as string;
-						const projectId = this.getNodeParameter('projectId', i) as string;
+							const projectId = this.getNodeParameter('projectId', i) as string;
 						const summary = this.getNodeParameter('summary', i) as string;
 						const endpoint = `/organizations/${organizationId}/projects/${projectId}/tasks`;
 
@@ -418,8 +408,7 @@ export class Hubstaff implements INodeType {
 						const responseData = await hubstaffApiRequest.call(this, 'POST', endpoint, body);
 						returnData.push({ json: responseData });
 					} else if (operation === 'update') {
-						const organizationId = this.getNodeParameter('organizationId', i) as string;
-						const taskId = this.getNodeParameter('taskId', i) as string;
+							const taskId = this.getNodeParameter('taskId', i) as string;
 						const endpoint = `/organizations/${organizationId}/tasks/${taskId}`;
 
 						const updateFields = this.getNodeParameter('updateFields', i, {}) as IUpdateFields;
@@ -444,8 +433,7 @@ export class Hubstaff implements INodeType {
 						const responseData = await hubstaffApiRequest.call(this, 'PUT', endpoint, body);
 						returnData.push({ json: responseData });
 					} else if (operation === 'delete') {
-						const organizationId = this.getNodeParameter('organizationId', i) as string;
-						const taskId = this.getNodeParameter('taskId', i) as string;
+							const taskId = this.getNodeParameter('taskId', i) as string;
 						const endpoint = `/organizations/${organizationId}/tasks/${taskId}`;
 						await hubstaffApiRequest.call(this, 'DELETE', endpoint);
 						returnData.push({ json: { success: true, taskId, organizationId } });
@@ -455,8 +443,7 @@ export class Hubstaff implements INodeType {
 				// ==================== SCREENSHOT ====================
 				else if (resource === 'screenshot') {
 					if (operation === 'getAll') {
-						const organizationId = this.getNodeParameter('organizationId', i) as string;
-						const startDate = this.getNodeParameter('startDate', i) as string;
+							const startDate = this.getNodeParameter('startDate', i) as string;
 						const stopDate = this.getNodeParameter('stopDate', i) as string;
 						const endpoint = `/organizations/${organizationId}/screenshots`;
 
@@ -484,14 +471,12 @@ export class Hubstaff implements INodeType {
 				// ==================== NOTE ====================
 				else if (resource === 'note') {
 					if (operation === 'get') {
-						const organizationId = this.getNodeParameter('organizationId', i) as string;
-						const noteId = this.getNodeParameter('noteId', i) as string;
+							const noteId = this.getNodeParameter('noteId', i) as string;
 						const endpoint = `/organizations/${organizationId}/notes/${noteId}`;
 						const responseData = await hubstaffApiRequest.call(this, 'GET', endpoint);
 						returnData.push({ json: responseData });
 					} else if (operation === 'getAll') {
-						const organizationId = this.getNodeParameter('organizationId', i) as string;
-						const endpoint = `/organizations/${organizationId}/notes`;
+							const endpoint = `/organizations/${organizationId}/notes`;
 
 						const qs: IHubstaffQueryParameters = {};
 						const filters = this.getNodeParameter('filters', i, {}) as IFilterFields;
@@ -515,8 +500,7 @@ export class Hubstaff implements INodeType {
 						const responseData = await hubstaffApiRequest.call(this, 'GET', endpoint, {}, qs);
 						returnData.push({ json: responseData });
 					} else if (operation === 'create') {
-						const organizationId = this.getNodeParameter('organizationId', i) as string;
-						const description = this.getNodeParameter('description', i) as string;
+							const description = this.getNodeParameter('description', i) as string;
 						const endpoint = `/organizations/${organizationId}/notes`;
 
 						const body: IHubstaffNoteBody = { description };
@@ -540,14 +524,12 @@ export class Hubstaff implements INodeType {
 				// ==================== CLIENT ====================
 				else if (resource === 'client') {
 					if (operation === 'get') {
-						const organizationId = this.getNodeParameter('organizationId', i) as string;
-						const clientId = this.getNodeParameter('clientId', i) as string;
+							const clientId = this.getNodeParameter('clientId', i) as string;
 						const endpoint = `/organizations/${organizationId}/clients/${clientId}`;
 						const responseData = await hubstaffApiRequest.call(this, 'GET', endpoint);
 						returnData.push({ json: responseData });
 					} else if (operation === 'getAll') {
-						const organizationId = this.getNodeParameter('organizationId', i) as string;
-						const endpoint = `/organizations/${organizationId}/clients`;
+							const endpoint = `/organizations/${organizationId}/clients`;
 
 						const qs: IHubstaffQueryParameters = {};
 						const filters = this.getNodeParameter('filters', i, {}) as IFilterFields;
@@ -562,8 +544,7 @@ export class Hubstaff implements INodeType {
 						const responseData = await hubstaffApiRequest.call(this, 'GET', endpoint, {}, qs);
 						returnData.push({ json: responseData });
 					} else if (operation === 'create') {
-						const organizationId = this.getNodeParameter('organizationId', i) as string;
-						const name = this.getNodeParameter('name', i) as string;
+							const name = this.getNodeParameter('name', i) as string;
 						const endpoint = `/organizations/${organizationId}/clients`;
 
 						const body: IHubstaffClientBody = { name };
@@ -585,8 +566,7 @@ export class Hubstaff implements INodeType {
 						const responseData = await hubstaffApiRequest.call(this, 'POST', endpoint, body);
 						returnData.push({ json: responseData });
 					} else if (operation === 'update') {
-						const organizationId = this.getNodeParameter('organizationId', i) as string;
-						const clientId = this.getNodeParameter('clientId', i) as string;
+							const clientId = this.getNodeParameter('clientId', i) as string;
 						const endpoint = `/organizations/${organizationId}/clients/${clientId}`;
 
 						const updateFields = this.getNodeParameter('updateFields', i, {}) as IUpdateFields;
@@ -614,8 +594,7 @@ export class Hubstaff implements INodeType {
 						const responseData = await hubstaffApiRequest.call(this, 'PUT', endpoint, body);
 						returnData.push({ json: responseData });
 					} else if (operation === 'delete') {
-						const organizationId = this.getNodeParameter('organizationId', i) as string;
-						const clientId = this.getNodeParameter('clientId', i) as string;
+							const clientId = this.getNodeParameter('clientId', i) as string;
 						const endpoint = `/organizations/${organizationId}/clients/${clientId}`;
 						await hubstaffApiRequest.call(this, 'DELETE', endpoint);
 						returnData.push({ json: { success: true, clientId, organizationId } });
@@ -625,14 +604,12 @@ export class Hubstaff implements INodeType {
 				// ==================== INVOICE ====================
 				else if (resource === 'invoice') {
 					if (operation === 'get') {
-						const organizationId = this.getNodeParameter('organizationId', i) as string;
-						const invoiceId = this.getNodeParameter('invoiceId', i) as string;
+							const invoiceId = this.getNodeParameter('invoiceId', i) as string;
 						const endpoint = `/organizations/${organizationId}/invoices/${invoiceId}`;
 						const responseData = await hubstaffApiRequest.call(this, 'GET', endpoint);
 						returnData.push({ json: responseData });
 					} else if (operation === 'getAll') {
-						const organizationId = this.getNodeParameter('organizationId', i) as string;
-						const endpoint = `/organizations/${organizationId}/invoices`;
+							const endpoint = `/organizations/${organizationId}/invoices`;
 
 						const qs: IHubstaffQueryParameters = {};
 						const filters = this.getNodeParameter('filters', i, {}) as IFilterFields;
@@ -656,8 +633,7 @@ export class Hubstaff implements INodeType {
 						const responseData = await hubstaffApiRequest.call(this, 'GET', endpoint, {}, qs);
 						returnData.push({ json: responseData });
 					} else if (operation === 'create') {
-						const organizationId = this.getNodeParameter('organizationId', i) as string;
-						const clientId = this.getNodeParameter('clientId', i) as string;
+							const clientId = this.getNodeParameter('clientId', i) as string;
 						const endpoint = `/organizations/${organizationId}/invoices`;
 
 						const body: IHubstaffInvoiceBody = { client_id: clientId };
@@ -688,8 +664,7 @@ export class Hubstaff implements INodeType {
 						const responseData = await hubstaffApiRequest.call(this, 'POST', endpoint, body);
 						returnData.push({ json: responseData });
 					} else if (operation === 'update') {
-						const organizationId = this.getNodeParameter('organizationId', i) as string;
-						const invoiceId = this.getNodeParameter('invoiceId', i) as string;
+							const invoiceId = this.getNodeParameter('invoiceId', i) as string;
 						const endpoint = `/organizations/${organizationId}/invoices/${invoiceId}`;
 
 						const updateFields = this.getNodeParameter('updateFields', i, {}) as IUpdateFields;
@@ -714,8 +689,7 @@ export class Hubstaff implements INodeType {
 						const responseData = await hubstaffApiRequest.call(this, 'PUT', endpoint, body);
 						returnData.push({ json: responseData });
 					} else if (operation === 'delete') {
-						const organizationId = this.getNodeParameter('organizationId', i) as string;
-						const invoiceId = this.getNodeParameter('invoiceId', i) as string;
+							const invoiceId = this.getNodeParameter('invoiceId', i) as string;
 						const endpoint = `/organizations/${organizationId}/invoices/${invoiceId}`;
 						await hubstaffApiRequest.call(this, 'DELETE', endpoint);
 						returnData.push({ json: { success: true, invoiceId, organizationId } });
@@ -725,14 +699,12 @@ export class Hubstaff implements INodeType {
 				// ==================== SCHEDULE ====================
 				else if (resource === 'schedule') {
 					if (operation === 'get') {
-						const organizationId = this.getNodeParameter('organizationId', i) as string;
-						const scheduleId = this.getNodeParameter('scheduleId', i) as string;
+							const scheduleId = this.getNodeParameter('scheduleId', i) as string;
 						const endpoint = `/organizations/${organizationId}/schedules/${scheduleId}`;
 						const responseData = await hubstaffApiRequest.call(this, 'GET', endpoint);
 						returnData.push({ json: responseData });
 					} else if (operation === 'getAll') {
-						const organizationId = this.getNodeParameter('organizationId', i) as string;
-						const endpoint = `/organizations/${organizationId}/schedules`;
+							const endpoint = `/organizations/${organizationId}/schedules`;
 
 						const qs: IHubstaffQueryParameters = {};
 						const filters = this.getNodeParameter('filters', i, {}) as IFilterFields;
@@ -753,8 +725,7 @@ export class Hubstaff implements INodeType {
 						const responseData = await hubstaffApiRequest.call(this, 'GET', endpoint, {}, qs);
 						returnData.push({ json: responseData });
 					} else if (operation === 'create') {
-						const organizationId = this.getNodeParameter('organizationId', i) as string;
-						const userId = this.getNodeParameter('userId', i) as string;
+							const userId = this.getNodeParameter('userId', i) as string;
 						const startTime = this.getNodeParameter('startTime', i) as string;
 						const endTime = this.getNodeParameter('endTime', i) as string;
 						const endpoint = `/organizations/${organizationId}/schedules`;
@@ -782,8 +753,7 @@ export class Hubstaff implements INodeType {
 						const responseData = await hubstaffApiRequest.call(this, 'POST', endpoint, body);
 						returnData.push({ json: responseData });
 					} else if (operation === 'update') {
-						const organizationId = this.getNodeParameter('organizationId', i) as string;
-						const scheduleId = this.getNodeParameter('scheduleId', i) as string;
+							const scheduleId = this.getNodeParameter('scheduleId', i) as string;
 						const endpoint = `/organizations/${organizationId}/schedules/${scheduleId}`;
 
 						const updateFields = this.getNodeParameter('updateFields', i, {}) as IUpdateFields;
@@ -808,8 +778,7 @@ export class Hubstaff implements INodeType {
 						const responseData = await hubstaffApiRequest.call(this, 'PUT', endpoint, body);
 						returnData.push({ json: responseData });
 					} else if (operation === 'delete') {
-						const organizationId = this.getNodeParameter('organizationId', i) as string;
-						const scheduleId = this.getNodeParameter('scheduleId', i) as string;
+							const scheduleId = this.getNodeParameter('scheduleId', i) as string;
 						const endpoint = `/organizations/${organizationId}/schedules/${scheduleId}`;
 						await hubstaffApiRequest.call(this, 'DELETE', endpoint);
 						returnData.push({ json: { success: true, scheduleId, organizationId } });
@@ -819,14 +788,12 @@ export class Hubstaff implements INodeType {
 				// ==================== TO-DO ====================
 				else if (resource === 'todo') {
 					if (operation === 'get') {
-						const organizationId = this.getNodeParameter('organizationId', i) as string;
-						const todoId = this.getNodeParameter('todoId', i) as string;
+							const todoId = this.getNodeParameter('todoId', i) as string;
 						const endpoint = `/organizations/${organizationId}/todos/${todoId}`;
 						const responseData = await hubstaffApiRequest.call(this, 'GET', endpoint);
 						returnData.push({ json: responseData });
 					} else if (operation === 'getAll') {
-						const organizationId = this.getNodeParameter('organizationId', i) as string;
-						const endpoint = `/organizations/${organizationId}/todos`;
+							const endpoint = `/organizations/${organizationId}/todos`;
 
 						const qs: IHubstaffQueryParameters = {};
 						const filters = this.getNodeParameter('filters', i, {}) as IFilterFields;
@@ -847,8 +814,7 @@ export class Hubstaff implements INodeType {
 						const responseData = await hubstaffApiRequest.call(this, 'GET', endpoint, {}, qs);
 						returnData.push({ json: responseData });
 					} else if (operation === 'create') {
-						const organizationId = this.getNodeParameter('organizationId', i) as string;
-						const title = this.getNodeParameter('title', i) as string;
+							const title = this.getNodeParameter('title', i) as string;
 						const endpoint = `/organizations/${organizationId}/todos`;
 
 						const body: IHubstaffTodoBody = { title };
@@ -873,8 +839,7 @@ export class Hubstaff implements INodeType {
 						const responseData = await hubstaffApiRequest.call(this, 'POST', endpoint, body);
 						returnData.push({ json: responseData });
 					} else if (operation === 'update') {
-						const organizationId = this.getNodeParameter('organizationId', i) as string;
-						const todoId = this.getNodeParameter('todoId', i) as string;
+							const todoId = this.getNodeParameter('todoId', i) as string;
 						const endpoint = `/organizations/${organizationId}/todos/${todoId}`;
 
 						const updateFields = this.getNodeParameter('updateFields', i, {}) as IUpdateFields;
@@ -902,8 +867,7 @@ export class Hubstaff implements INodeType {
 						const responseData = await hubstaffApiRequest.call(this, 'PUT', endpoint, body);
 						returnData.push({ json: responseData });
 					} else if (operation === 'delete') {
-						const organizationId = this.getNodeParameter('organizationId', i) as string;
-						const todoId = this.getNodeParameter('todoId', i) as string;
+							const todoId = this.getNodeParameter('todoId', i) as string;
 						const endpoint = `/organizations/${organizationId}/todos/${todoId}`;
 						await hubstaffApiRequest.call(this, 'DELETE', endpoint);
 						returnData.push({ json: { success: true, todoId, organizationId } });
@@ -913,8 +877,7 @@ export class Hubstaff implements INodeType {
 				// ==================== APPLICATION ====================
 				else if (resource === 'application') {
 					if (operation === 'getAll') {
-						const organizationId = this.getNodeParameter('organizationId', i) as string;
-						const startDate = this.getNodeParameter('startDate', i) as string;
+							const startDate = this.getNodeParameter('startDate', i) as string;
 						const stopDate = this.getNodeParameter('stopDate', i) as string;
 						const endpoint = `/organizations/${organizationId}/activities/applications`;
 
@@ -942,8 +905,7 @@ export class Hubstaff implements INodeType {
 				// ==================== URL ====================
 				else if (resource === 'url') {
 					if (operation === 'getAll') {
-						const organizationId = this.getNodeParameter('organizationId', i) as string;
-						const startDate = this.getNodeParameter('startDate', i) as string;
+							const startDate = this.getNodeParameter('startDate', i) as string;
 						const stopDate = this.getNodeParameter('stopDate', i) as string;
 						const endpoint = `/organizations/${organizationId}/activities/urls`;
 

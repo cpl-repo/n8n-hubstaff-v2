@@ -29,20 +29,4 @@ export const organizationOperations: INodeProperties[] = [
 	},
 ];
 
-export const organizationFields: INodeProperties[] = [
-	// Get
-	{
-		displayName: 'Organization ID',
-		name: 'organizationId',
-		type: 'string',
-		required: true,
-		displayOptions: {
-			show: {
-				resource: ['organization'],
-				operation: ['get'],
-			},
-		},
-		default: '',
-		description: 'The ID of the organization',
-	},
-];
+export const organizationFields: INodeProperties[] = [];

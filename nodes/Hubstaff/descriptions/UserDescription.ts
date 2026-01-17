@@ -36,22 +36,6 @@ export const userOperations: INodeProperties[] = [
 ];
 
 export const userFields: INodeProperties[] = [
-	// Organization ID for getAll
-	{
-		displayName: 'Organization ID',
-		name: 'organizationId',
-		type: 'string',
-		required: true,
-		displayOptions: {
-			show: {
-				resource: ['user'],
-				operation: ['getAll'],
-			},
-		},
-		default: '',
-		description: 'The ID of the organization',
-	},
-
 	// User ID for get
 	{
 		displayName: 'User ID',

@@ -48,21 +48,6 @@ export const invoiceOperations: INodeProperties[] = [
 ];
 
 export const invoiceFields: INodeProperties[] = [
-	// Organization ID
-	{
-		displayName: 'Organization ID',
-		name: 'organizationId',
-		type: 'string',
-		required: true,
-		displayOptions: {
-			show: {
-				resource: ['invoice'],
-			},
-		},
-		default: '',
-		description: 'The ID of the organization',
-	},
-
 	// Invoice ID for get, update, delete
 	{
 		displayName: 'Invoice ID',

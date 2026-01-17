@@ -24,21 +24,6 @@ export const urlOperations: INodeProperties[] = [
 ];
 
 export const urlFields: INodeProperties[] = [
-	// Organization ID
-	{
-		displayName: 'Organization ID',
-		name: 'organizationId',
-		type: 'string',
-		required: true,
-		displayOptions: {
-			show: {
-				resource: ['url'],
-			},
-		},
-		default: '',
-		description: 'The ID of the organization',
-	},
-
 	// Start Date
 	{
 		displayName: 'Start Date',

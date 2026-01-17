@@ -48,21 +48,6 @@ export const scheduleOperations: INodeProperties[] = [
 ];
 
 export const scheduleFields: INodeProperties[] = [
-	// Organization ID
-	{
-		displayName: 'Organization ID',
-		name: 'organizationId',
-		type: 'string',
-		required: true,
-		displayOptions: {
-			show: {
-				resource: ['schedule'],
-			},
-		},
-		default: '',
-		description: 'The ID of the organization',
-	},
-
 	// Schedule ID for get, update, delete
 	{
 		displayName: 'Schedule ID',

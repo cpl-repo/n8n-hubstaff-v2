@@ -48,21 +48,6 @@ export const taskOperations: INodeProperties[] = [
 ];
 
 export const taskFields: INodeProperties[] = [
-	// Organization ID
-	{
-		displayName: 'Organization ID',
-		name: 'organizationId',
-		type: 'string',
-		required: true,
-		displayOptions: {
-			show: {
-				resource: ['task'],
-			},
-		},
-		default: '',
-		description: 'The ID of the organization',
-	},
-
 	// Project ID for create
 	{
 		displayName: 'Project ID',

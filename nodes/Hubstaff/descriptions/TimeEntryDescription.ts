@@ -24,20 +24,6 @@ export const timeEntryOperations: INodeProperties[] = [
 ];
 
 export const timeEntryFields: INodeProperties[] = [
-	// Common fields
-	{
-		displayName: 'Organization ID',
-		name: 'organizationId',
-		type: 'string',
-		required: true,
-		displayOptions: {
-			show: {
-				resource: ['timeEntry'],
-			},
-		},
-		default: '',
-		description: 'The ID of the organization',
-	},
 	{
 		displayName: 'Start Date',
 		name: 'startDate',

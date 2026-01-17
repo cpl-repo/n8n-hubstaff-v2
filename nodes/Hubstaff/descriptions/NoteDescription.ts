@@ -36,21 +36,6 @@ export const noteOperations: INodeProperties[] = [
 ];
 
 export const noteFields: INodeProperties[] = [
-	// Organization ID
-	{
-		displayName: 'Organization ID',
-		name: 'organizationId',
-		type: 'string',
-		required: true,
-		displayOptions: {
-			show: {
-				resource: ['note'],
-			},
-		},
-		default: '',
-		description: 'The ID of the organization',
-	},
-
 	// Note ID for get
 	{
 		displayName: 'Note ID',
