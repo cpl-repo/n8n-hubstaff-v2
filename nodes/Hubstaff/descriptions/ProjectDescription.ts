@@ -19,12 +19,6 @@ export const projectOperations: INodeProperties[] = [
 				action: 'Create a project',
 			},
 			{
-				name: 'Delete',
-				value: 'delete',
-				description: 'Delete a project',
-				action: 'Delete a project',
-			},
-			{
 				name: 'Get',
 				value: 'get',
 				description: 'Get a project',
@@ -48,7 +42,7 @@ export const projectOperations: INodeProperties[] = [
 ];
 
 export const projectFields: INodeProperties[] = [
-	// Get
+	// Get/Update
 	{
 		displayName: 'Project ID',
 		name: 'projectId',
@@ -57,7 +51,7 @@ export const projectFields: INodeProperties[] = [
 		displayOptions: {
 			show: {
 				resource: ['project'],
-				operation: ['get', 'update', 'delete'],
+				operation: ['get', 'update'],
 			},
 		},
 		default: '',

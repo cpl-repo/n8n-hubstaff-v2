@@ -13,12 +13,6 @@ export const noteOperations: INodeProperties[] = [
 		},
 		options: [
 			{
-				name: 'Create',
-				value: 'create',
-				description: 'Create a note',
-				action: 'Create a note',
-			},
-			{
 				name: 'Get',
 				value: 'get',
 				description: 'Get a note',
@@ -52,26 +46,37 @@ export const noteFields: INodeProperties[] = [
 		description: 'The ID of the note',
 	},
 
-	// Description for create
+	// Required date parameters for getAll (API requires time_slot[start] and time_slot[stop])
 	{
-		displayName: 'Description',
-		name: 'description',
-		type: 'string',
-		typeOptions: {
-			rows: 4,
-		},
+		displayName: 'Start Date',
+		name: 'startDate',
+		type: 'dateTime',
 		required: true,
 		displayOptions: {
 			show: {
 				resource: ['note'],
-				operation: ['create'],
+				operation: ['getAll'],
 			},
 		},
 		default: '',
-		description: 'The content of the note',
+		description: 'Start date for notes (required by API, max 31 days range)',
+	},
+	{
+		displayName: 'Stop Date',
+		name: 'stopDate',
+		type: 'dateTime',
+		required: true,
+		displayOptions: {
+			show: {
+				resource: ['note'],
+				operation: ['getAll'],
+			},
+		},
+		default: '',
+		description: 'Stop date for notes (required by API, max 31 days range)',
 	},
 
-	// Additional Fields for create
+	// Additional Fields for getAll
 	{
 		displayName: 'Additional Fields',
 		name: 'additionalFields',
@@ -81,62 +86,10 @@ export const noteFields: INodeProperties[] = [
 		displayOptions: {
 			show: {
 				resource: ['note'],
-				operation: ['create'],
-			},
-		},
-		options: [
-			{
-				displayName: 'User ID',
-				name: 'userId',
-				type: 'string',
-				default: '',
-				description: 'The ID of the user the note is for',
-			},
-			{
-				displayName: 'Project ID',
-				name: 'projectId',
-				type: 'string',
-				default: '',
-				description: 'The ID of the project the note is for',
-			},
-			{
-				displayName: 'Task ID',
-				name: 'taskId',
-				type: 'string',
-				default: '',
-				description: 'The ID of the task the note is for',
-			},
-		],
-	},
-
-	// Filters for getAll
-	{
-		displayName: 'Filters',
-		name: 'filters',
-		type: 'collection',
-		placeholder: 'Add Filter',
-		default: {},
-		displayOptions: {
-			show: {
-				resource: ['note'],
 				operation: ['getAll'],
 			},
 		},
 		options: [
-			{
-				displayName: 'Start Date',
-				name: 'startDate',
-				type: 'dateTime',
-				default: '',
-				description: 'Start date for notes',
-			},
-			{
-				displayName: 'Stop Date',
-				name: 'stopDate',
-				type: 'dateTime',
-				default: '',
-				description: 'Stop date for notes',
-			},
 			{
 				displayName: 'User IDs',
 				name: 'userIds',

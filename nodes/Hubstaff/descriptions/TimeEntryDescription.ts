@@ -66,18 +66,29 @@ export const timeEntryFields: INodeProperties[] = [
 		},
 		options: [
 			{
-				displayName: 'User IDs',
-				name: 'userIds',
-				type: 'string',
+				displayName: 'Status',
+				name: 'status',
+				type: 'options',
+				options: [
+					{
+						name: 'All',
+						value: '',
+					},
+					{
+						name: 'Pending',
+						value: 'pending',
+					},
+					{
+						name: 'Approved',
+						value: 'approved',
+					},
+					{
+						name: 'Denied',
+						value: 'denied',
+					},
+				],
 				default: '',
-				description: 'Comma-separated list of user IDs to filter by',
-			},
-			{
-				displayName: 'Project IDs',
-				name: 'projectIds',
-				type: 'string',
-				default: '',
-				description: 'Comma-separated list of project IDs to filter by',
+				description: 'Filter timesheets by approval status',
 			},
 			{
 				displayName: 'Page',

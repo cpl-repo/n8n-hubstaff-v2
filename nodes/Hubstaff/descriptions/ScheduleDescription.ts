@@ -15,32 +15,20 @@ export const scheduleOperations: INodeProperties[] = [
 			{
 				name: 'Create',
 				value: 'create',
-				description: 'Create a schedule',
-				action: 'Create a schedule',
-			},
-			{
-				name: 'Delete',
-				value: 'delete',
-				description: 'Delete a schedule',
-				action: 'Delete a schedule',
-			},
-			{
-				name: 'Get',
-				value: 'get',
-				description: 'Get a schedule',
-				action: 'Get a schedule',
+				description: 'Create an attendance schedule',
+				action: 'Create an attendance schedule',
 			},
 			{
 				name: 'Get Many',
 				value: 'getAll',
-				description: 'Get all schedules',
-				action: 'Get all schedules',
+				description: 'Get all attendance schedules',
+				action: 'Get all attendance schedules',
 			},
 			{
 				name: 'Update',
 				value: 'update',
-				description: 'Update a schedule',
-				action: 'Update a schedule',
+				description: 'Update an attendance schedule',
+				action: 'Update an attendance schedule',
 			},
 		],
 		default: 'getAll',
@@ -48,7 +36,7 @@ export const scheduleOperations: INodeProperties[] = [
 ];
 
 export const scheduleFields: INodeProperties[] = [
-	// Schedule ID for get, update, delete
+	// Schedule ID for update
 	{
 		displayName: 'Schedule ID',
 		name: 'scheduleId',
@@ -57,11 +45,41 @@ export const scheduleFields: INodeProperties[] = [
 		displayOptions: {
 			show: {
 				resource: ['schedule'],
-				operation: ['get', 'update', 'delete'],
+				operation: ['update'],
 			},
 		},
 		default: '',
-		description: 'The ID of the schedule',
+		description: 'The ID of the attendance schedule',
+	},
+
+	// Required date parameters for getAll (API requires date[start] and date[stop])
+	{
+		displayName: 'Start Date',
+		name: 'startDate',
+		type: 'dateTime',
+		required: true,
+		displayOptions: {
+			show: {
+				resource: ['schedule'],
+				operation: ['getAll'],
+			},
+		},
+		default: '',
+		description: 'Start date for schedules (required by API)',
+	},
+	{
+		displayName: 'Stop Date',
+		name: 'stopDate',
+		type: 'dateTime',
+		required: true,
+		displayOptions: {
+			show: {
+				resource: ['schedule'],
+				operation: ['getAll'],
+			},
+		},
+		default: '',
+		description: 'Stop date for schedules (required by API)',
 	},
 
 	// User ID for create
@@ -80,10 +98,10 @@ export const scheduleFields: INodeProperties[] = [
 		description: 'The ID of the user to schedule',
 	},
 
-	// Start Time for create
+	// Start Date for create
 	{
-		displayName: 'Start Time',
-		name: 'startTime',
+		displayName: 'Schedule Date',
+		name: 'scheduleDate',
 		type: 'dateTime',
 		required: true,
 		displayOptions: {
@@ -93,14 +111,30 @@ export const scheduleFields: INodeProperties[] = [
 			},
 		},
 		default: '',
-		description: 'The start time of the schedule',
+		description: 'The date of the schedule',
+	},
+
+	// Start Time for create
+	{
+		displayName: 'Start Time',
+		name: 'startTime',
+		type: 'string',
+		required: true,
+		displayOptions: {
+			show: {
+				resource: ['schedule'],
+				operation: ['create'],
+			},
+		},
+		default: '09:00',
+		description: 'The start time of the schedule (HH:MM format)',
 	},
 
 	// End Time for create
 	{
 		displayName: 'End Time',
 		name: 'endTime',
-		type: 'dateTime',
+		type: 'string',
 		required: true,
 		displayOptions: {
 			show: {
@@ -108,8 +142,8 @@ export const scheduleFields: INodeProperties[] = [
 				operation: ['create'],
 			},
 		},
-		default: '',
-		description: 'The end time of the schedule',
+		default: '17:00',
+		description: 'The end time of the schedule (HH:MM format)',
 	},
 
 	// Additional Fields for create
@@ -127,32 +161,8 @@ export const scheduleFields: INodeProperties[] = [
 		},
 		options: [
 			{
-				displayName: 'Project ID',
-				name: 'projectId',
-				type: 'string',
-				default: '',
-				description: 'The ID of the project for this schedule',
-			},
-			{
-				displayName: 'Task ID',
-				name: 'taskId',
-				type: 'string',
-				default: '',
-				description: 'The ID of the task for this schedule',
-			},
-			{
-				displayName: 'Notes',
-				name: 'notes',
-				type: 'string',
-				typeOptions: {
-					rows: 4,
-				},
-				default: '',
-				description: 'Additional notes for the schedule',
-			},
-			{
-				displayName: 'Repeat',
-				name: 'repeat',
+				displayName: 'Repeat Schedule',
+				name: 'repeatSchedule',
 				type: 'options',
 				options: [
 					{
@@ -160,34 +170,42 @@ export const scheduleFields: INodeProperties[] = [
 						value: 'none',
 					},
 					{
-						name: 'Daily',
-						value: 'daily',
-					},
-					{
 						name: 'Weekly',
 						value: 'weekly',
 					},
 					{
 						name: 'Bi-Weekly',
-						value: 'biweekly',
-					},
-					{
-						name: 'Monthly',
-						value: 'monthly',
+						value: 'bi_weekly',
 					},
 				],
 				default: 'none',
 				description: 'Repeat frequency for the schedule',
 			},
+			{
+				displayName: 'Weekdays',
+				name: 'weekdays',
+				type: 'multiOptions',
+				options: [
+					{ name: 'Monday', value: 'monday' },
+					{ name: 'Tuesday', value: 'tuesday' },
+					{ name: 'Wednesday', value: 'wednesday' },
+					{ name: 'Thursday', value: 'thursday' },
+					{ name: 'Friday', value: 'friday' },
+					{ name: 'Saturday', value: 'saturday' },
+					{ name: 'Sunday', value: 'sunday' },
+				],
+				default: [],
+				description: 'Weekdays for repeating schedules',
+			},
 		],
 	},
 
-	// Filters for getAll
+	// Additional Fields for getAll
 	{
-		displayName: 'Filters',
-		name: 'filters',
+		displayName: 'Additional Fields',
+		name: 'additionalFields',
 		type: 'collection',
-		placeholder: 'Add Filter',
+		placeholder: 'Add Field',
 		default: {},
 		displayOptions: {
 			show: {
@@ -196,27 +214,6 @@ export const scheduleFields: INodeProperties[] = [
 			},
 		},
 		options: [
-			{
-				displayName: 'User ID',
-				name: 'userId',
-				type: 'string',
-				default: '',
-				description: 'Filter schedules by user',
-			},
-			{
-				displayName: 'Start Date',
-				name: 'startDate',
-				type: 'dateTime',
-				default: '',
-				description: 'Filter schedules from this date',
-			},
-			{
-				displayName: 'End Date',
-				name: 'endDate',
-				type: 'dateTime',
-				default: '',
-				description: 'Filter schedules up to this date',
-			},
 			{
 				displayName: 'Page',
 				name: 'page',
@@ -247,40 +244,16 @@ export const scheduleFields: INodeProperties[] = [
 			{
 				displayName: 'Start Time',
 				name: 'startTime',
-				type: 'dateTime',
+				type: 'string',
 				default: '',
-				description: 'The start time of the schedule',
+				description: 'The start time of the schedule (HH:MM format)',
 			},
 			{
 				displayName: 'End Time',
 				name: 'endTime',
-				type: 'dateTime',
-				default: '',
-				description: 'The end time of the schedule',
-			},
-			{
-				displayName: 'Project ID',
-				name: 'projectId',
 				type: 'string',
 				default: '',
-				description: 'The ID of the project for this schedule',
-			},
-			{
-				displayName: 'Task ID',
-				name: 'taskId',
-				type: 'string',
-				default: '',
-				description: 'The ID of the task for this schedule',
-			},
-			{
-				displayName: 'Notes',
-				name: 'notes',
-				type: 'string',
-				typeOptions: {
-					rows: 4,
-				},
-				default: '',
-				description: 'Additional notes for the schedule',
+				description: 'The end time of the schedule (HH:MM format)',
 			},
 		],
 	},

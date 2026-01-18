@@ -15,32 +15,26 @@ export const todoOperations: INodeProperties[] = [
 			{
 				name: 'Create',
 				value: 'create',
-				description: 'Create a to-do item',
-				action: 'Create a to-do',
+				description: 'Create a global to-do',
+				action: 'Create a global to-do',
 			},
 			{
 				name: 'Delete',
 				value: 'delete',
-				description: 'Delete a to-do item',
-				action: 'Delete a to-do',
-			},
-			{
-				name: 'Get',
-				value: 'get',
-				description: 'Get a to-do item',
-				action: 'Get a to-do',
+				description: 'Delete a global to-do',
+				action: 'Delete a global to-do',
 			},
 			{
 				name: 'Get Many',
 				value: 'getAll',
-				description: 'Get all to-do items',
-				action: 'Get all to-dos',
+				description: 'Get all global to-dos',
+				action: 'Get all global to-dos',
 			},
 			{
 				name: 'Update',
 				value: 'update',
-				description: 'Update a to-do item',
-				action: 'Update a to-do',
+				description: 'Update a global to-do',
+				action: 'Update a global to-do',
 			},
 		],
 		default: 'getAll',
@@ -48,7 +42,7 @@ export const todoOperations: INodeProperties[] = [
 ];
 
 export const todoFields: INodeProperties[] = [
-	// To-do ID for get, update, delete
+	// To-do ID for update, delete
 	{
 		displayName: 'To-Do ID',
 		name: 'todoId',
@@ -57,17 +51,17 @@ export const todoFields: INodeProperties[] = [
 		displayOptions: {
 			show: {
 				resource: ['todo'],
-				operation: ['get', 'update', 'delete'],
+				operation: ['update', 'delete'],
 			},
 		},
 		default: '',
-		description: 'The ID of the to-do item',
+		description: 'The ID of the global to-do',
 	},
 
-	// Title for create
+	// Name for create
 	{
-		displayName: 'Title',
-		name: 'title',
+		displayName: 'Name',
+		name: 'name',
 		type: 'string',
 		required: true,
 		displayOptions: {
@@ -77,7 +71,7 @@ export const todoFields: INodeProperties[] = [
 			},
 		},
 		default: '',
-		description: 'The title of the to-do item',
+		description: 'The name of the global to-do',
 	},
 
 	// Additional Fields for create
@@ -95,66 +89,21 @@ export const todoFields: INodeProperties[] = [
 		},
 		options: [
 			{
-				displayName: 'Description',
-				name: 'description',
-				type: 'string',
-				typeOptions: {
-					rows: 4,
-				},
-				default: '',
-				description: 'The description of the to-do item',
-			},
-			{
-				displayName: 'User ID',
-				name: 'userId',
+				displayName: 'Project IDs',
+				name: 'projectIds',
 				type: 'string',
 				default: '',
-				description: 'The ID of the user to assign the to-do to',
-			},
-			{
-				displayName: 'Project ID',
-				name: 'projectId',
-				type: 'string',
-				default: '',
-				description: 'The ID of the project for this to-do',
-			},
-			{
-				displayName: 'Due Date',
-				name: 'dueAt',
-				type: 'dateTime',
-				default: '',
-				description: 'The due date of the to-do item',
-			},
-			{
-				displayName: 'Priority',
-				name: 'priority',
-				type: 'options',
-				options: [
-					{
-						name: 'Low',
-						value: 'low',
-					},
-					{
-						name: 'Normal',
-						value: 'normal',
-					},
-					{
-						name: 'High',
-						value: 'high',
-					},
-				],
-				default: 'normal',
-				description: 'The priority of the to-do item',
+				description: 'Comma-separated list of project IDs to add this to-do to',
 			},
 		],
 	},
 
-	// Filters for getAll
+	// Additional Fields for getAll
 	{
-		displayName: 'Filters',
-		name: 'filters',
+		displayName: 'Additional Fields',
+		name: 'additionalFields',
 		type: 'collection',
-		placeholder: 'Add Filter',
+		placeholder: 'Add Field',
 		default: {},
 		displayOptions: {
 			show: {
@@ -163,41 +112,6 @@ export const todoFields: INodeProperties[] = [
 			},
 		},
 		options: [
-			{
-				displayName: 'User ID',
-				name: 'userId',
-				type: 'string',
-				default: '',
-				description: 'Filter to-dos by user',
-			},
-			{
-				displayName: 'Project ID',
-				name: 'projectId',
-				type: 'string',
-				default: '',
-				description: 'Filter to-dos by project',
-			},
-			{
-				displayName: 'Status',
-				name: 'status',
-				type: 'options',
-				options: [
-					{
-						name: 'Active',
-						value: 'active',
-					},
-					{
-						name: 'Completed',
-						value: 'completed',
-					},
-					{
-						name: 'All',
-						value: 'all',
-					},
-				],
-				default: 'active',
-				description: 'Filter to-dos by status',
-			},
 			{
 				displayName: 'Page',
 				name: 'page',
@@ -226,73 +140,25 @@ export const todoFields: INodeProperties[] = [
 		},
 		options: [
 			{
-				displayName: 'Title',
-				name: 'title',
+				displayName: 'Name',
+				name: 'name',
 				type: 'string',
 				default: '',
-				description: 'The title of the to-do item',
+				description: 'The name of the global to-do',
 			},
 			{
-				displayName: 'Description',
-				name: 'description',
-				type: 'string',
-				typeOptions: {
-					rows: 4,
-				},
-				default: '',
-				description: 'The description of the to-do item',
-			},
-			{
-				displayName: 'User ID',
-				name: 'userId',
+				displayName: 'Add Project IDs',
+				name: 'addProjectIds',
 				type: 'string',
 				default: '',
-				description: 'The ID of the user to assign the to-do to',
+				description: 'Comma-separated list of project IDs to add this to-do to',
 			},
 			{
-				displayName: 'Status',
-				name: 'status',
-				type: 'options',
-				options: [
-					{
-						name: 'Active',
-						value: 'active',
-					},
-					{
-						name: 'Completed',
-						value: 'completed',
-					},
-				],
-				default: 'active',
-				description: 'The status of the to-do item',
-			},
-			{
-				displayName: 'Due Date',
-				name: 'dueAt',
-				type: 'dateTime',
+				displayName: 'Remove Project IDs',
+				name: 'removeProjectIds',
+				type: 'string',
 				default: '',
-				description: 'The due date of the to-do item',
-			},
-			{
-				displayName: 'Priority',
-				name: 'priority',
-				type: 'options',
-				options: [
-					{
-						name: 'Low',
-						value: 'low',
-					},
-					{
-						name: 'Normal',
-						value: 'normal',
-					},
-					{
-						name: 'High',
-						value: 'high',
-					},
-				],
-				default: 'normal',
-				description: 'The priority of the to-do item',
+				description: 'Comma-separated list of project IDs to remove this to-do from',
 			},
 		],
 	},

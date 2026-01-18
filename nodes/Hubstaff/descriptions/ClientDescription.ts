@@ -19,12 +19,6 @@ export const clientOperations: INodeProperties[] = [
 				action: 'Create a client',
 			},
 			{
-				name: 'Delete',
-				value: 'delete',
-				description: 'Delete a client',
-				action: 'Delete a client',
-			},
-			{
 				name: 'Get',
 				value: 'get',
 				description: 'Get a client',
@@ -48,7 +42,7 @@ export const clientOperations: INodeProperties[] = [
 ];
 
 export const clientFields: INodeProperties[] = [
-	// Client ID for get, update, delete
+	// Client ID for get, update
 	{
 		displayName: 'Client ID',
 		name: 'clientId',
@@ -57,7 +51,7 @@ export const clientFields: INodeProperties[] = [
 		displayOptions: {
 			show: {
 				resource: ['client'],
-				operation: ['get', 'update', 'delete'],
+				operation: ['get', 'update'],
 			},
 		},
 		default: '',

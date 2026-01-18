@@ -16,18 +16,18 @@ This node provides access to **15 Hubstaff resources** with full CRUD operations
 | Resource | Operations |
 |----------|-----------|
 | **Organization** | Get, Get Many |
-| **Project** | Create, Delete, Get, Get Many, Update |
+| **Project** | Create, Get, Get Many, Update |
 | **Activity** | Get Many (with daily aggregation option) |
 | **Time Entry** | Get Many |
 | **Member** | Get, Get Many |
 | **User** | Get, Get Current, Get Many |
 | **Task** | Create, Delete, Get, Get Many, Update |
 | **Screenshot** | Get Many |
-| **Note** | Create, Get, Get Many |
-| **Client** | Create, Delete, Get, Get Many, Update |
-| **Invoice** | Create, Delete, Get, Get Many, Update |
-| **Schedule** | Create, Delete, Get, Get Many, Update |
-| **To-Do** | Create, Delete, Get, Get Many, Update |
+| **Note** | Get, Get Many |
+| **Client** | Create, Get, Get Many, Update |
+| **Invoice** | Get Many (client invoices) |
+| **Schedule** | Create, Get Many, Update (attendance schedules) |
+| **To-Do** | Create, Delete, Get Many, Update (global todos) |
 | **Application** | Get Many (app usage tracking) |
 | **URL** | Get Many (URL tracking) |
 
@@ -326,6 +326,21 @@ For Hubstaff API support, contact api@hubstaff.com
 4. Consider caching data when possible
 
 ## Changelog
+
+### 1.3.0 (2026-01-18)
+
+**Major API Compliance Fixes**
+- Fixed all API endpoints to match Hubstaff OpenAPI specification
+- Fixed authentication: Personal Access Token is now correctly exchanged for access token
+- Fixed Project endpoints: GET/PUT now use `/projects/{id}` (removed invalid delete operation)
+- Fixed Task endpoints: GET/PUT/DELETE now use `/tasks/{id}`
+- Fixed Client endpoints: GET/PUT now use `/clients/{id}` (removed invalid delete operation)
+- Fixed Note endpoints: GET now uses `/notes/{id}`, removed invalid create operation
+- Fixed Invoice resource: Now uses `/client_invoices` endpoint (read-only)
+- Fixed Schedule resource: Now uses `/attendance_schedules` endpoint with correct operations
+- Fixed To-Do resource: Now uses `/global_todos` endpoint with correct operations
+- Added token caching with automatic refresh
+- Updated all query parameter names to match API specification
 
 ### 1.2.0 (2026-01-17)
 

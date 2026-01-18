@@ -13,34 +13,10 @@ export const invoiceOperations: INodeProperties[] = [
 		},
 		options: [
 			{
-				name: 'Create',
-				value: 'create',
-				description: 'Create an invoice',
-				action: 'Create an invoice',
-			},
-			{
-				name: 'Delete',
-				value: 'delete',
-				description: 'Delete an invoice',
-				action: 'Delete an invoice',
-			},
-			{
-				name: 'Get',
-				value: 'get',
-				description: 'Get an invoice',
-				action: 'Get an invoice',
-			},
-			{
 				name: 'Get Many',
 				value: 'getAll',
-				description: 'Get all invoices',
-				action: 'Get all invoices',
-			},
-			{
-				name: 'Update',
-				value: 'update',
-				description: 'Update an invoice',
-				action: 'Update an invoice',
+				description: 'Get all client invoices',
+				action: 'Get all client invoices',
 			},
 		],
 		default: 'getAll',
@@ -48,39 +24,7 @@ export const invoiceOperations: INodeProperties[] = [
 ];
 
 export const invoiceFields: INodeProperties[] = [
-	// Invoice ID for get, update, delete
-	{
-		displayName: 'Invoice ID',
-		name: 'invoiceId',
-		type: 'string',
-		required: true,
-		displayOptions: {
-			show: {
-				resource: ['invoice'],
-				operation: ['get', 'update', 'delete'],
-			},
-		},
-		default: '',
-		description: 'The ID of the invoice',
-	},
-
-	// Client ID for create
-	{
-		displayName: 'Client ID',
-		name: 'clientId',
-		type: 'string',
-		required: true,
-		displayOptions: {
-			show: {
-				resource: ['invoice'],
-				operation: ['create'],
-			},
-		},
-		default: '',
-		description: 'The ID of the client to invoice',
-	},
-
-	// Additional Fields for create
+	// Filters for getAll
 	{
 		displayName: 'Additional Fields',
 		name: 'additionalFields',
@@ -90,85 +34,16 @@ export const invoiceFields: INodeProperties[] = [
 		displayOptions: {
 			show: {
 				resource: ['invoice'],
-				operation: ['create'],
-			},
-		},
-		options: [
-			{
-				displayName: 'Invoice Number',
-				name: 'invoiceNumber',
-				type: 'string',
-				default: '',
-				description: 'Custom invoice number',
-			},
-			{
-				displayName: 'Issue Date',
-				name: 'issueDate',
-				type: 'dateTime',
-				default: '',
-				description: 'The issue date of the invoice',
-			},
-			{
-				displayName: 'Due Date',
-				name: 'dueDate',
-				type: 'dateTime',
-				default: '',
-				description: 'The due date of the invoice',
-			},
-			{
-				displayName: 'Notes',
-				name: 'notes',
-				type: 'string',
-				typeOptions: {
-					rows: 4,
-				},
-				default: '',
-				description: 'Additional notes for the invoice',
-			},
-			{
-				displayName: 'Project IDs',
-				name: 'projectIds',
-				type: 'string',
-				default: '',
-				description: 'Comma-separated list of project IDs to include',
-			},
-			{
-				displayName: 'Start Date',
-				name: 'startDate',
-				type: 'dateTime',
-				default: '',
-				description: 'Start date for time entries to include',
-			},
-			{
-				displayName: 'End Date',
-				name: 'endDate',
-				type: 'dateTime',
-				default: '',
-				description: 'End date for time entries to include',
-			},
-		],
-	},
-
-	// Filters for getAll
-	{
-		displayName: 'Filters',
-		name: 'filters',
-		type: 'collection',
-		placeholder: 'Add Filter',
-		default: {},
-		displayOptions: {
-			show: {
-				resource: ['invoice'],
 				operation: ['getAll'],
 			},
 		},
 		options: [
 			{
-				displayName: 'Client ID',
-				name: 'clientId',
+				displayName: 'Client IDs',
+				name: 'clientIds',
 				type: 'string',
 				default: '',
-				description: 'Filter invoices by client',
+				description: 'Comma-separated list of client IDs to filter by',
 			},
 			{
 				displayName: 'Status',
@@ -180,38 +55,37 @@ export const invoiceFields: INodeProperties[] = [
 						value: 'draft',
 					},
 					{
-						name: 'Sent',
-						value: 'sent',
+						name: 'Open',
+						value: 'open',
 					},
 					{
-						name: 'Paid',
-						value: 'paid',
-					},
-					{
-						name: 'Overdue',
-						value: 'overdue',
-					},
-					{
-						name: 'All',
-						value: 'all',
+						name: 'Closed',
+						value: 'closed',
 					},
 				],
-				default: 'all',
+				default: 'open',
 				description: 'Filter invoices by status',
 			},
 			{
-				displayName: 'Start Date',
-				name: 'startDate',
+				displayName: 'Issue Date Start',
+				name: 'issueDateStart',
 				type: 'dateTime',
 				default: '',
-				description: 'Filter invoices from this date',
+				description: 'Filter invoices issued from this date',
 			},
 			{
-				displayName: 'End Date',
-				name: 'endDate',
+				displayName: 'Issue Date Stop',
+				name: 'issueDateStop',
 				type: 'dateTime',
 				default: '',
-				description: 'Filter invoices up to this date',
+				description: 'Filter invoices issued up to this date',
+			},
+			{
+				displayName: 'Include Line Items',
+				name: 'includeLineItems',
+				type: 'boolean',
+				default: false,
+				description: 'Whether to include invoice line items in the response',
 			},
 			{
 				displayName: 'Page',
@@ -222,75 +96,6 @@ export const invoiceFields: INodeProperties[] = [
 				},
 				default: 1,
 				description: 'Page number for pagination',
-			},
-		],
-	},
-
-	// Update Fields
-	{
-		displayName: 'Update Fields',
-		name: 'updateFields',
-		type: 'collection',
-		placeholder: 'Add Field',
-		default: {},
-		displayOptions: {
-			show: {
-				resource: ['invoice'],
-				operation: ['update'],
-			},
-		},
-		options: [
-			{
-				displayName: 'Invoice Number',
-				name: 'invoiceNumber',
-				type: 'string',
-				default: '',
-				description: 'Custom invoice number',
-			},
-			{
-				displayName: 'Issue Date',
-				name: 'issueDate',
-				type: 'dateTime',
-				default: '',
-				description: 'The issue date of the invoice',
-			},
-			{
-				displayName: 'Due Date',
-				name: 'dueDate',
-				type: 'dateTime',
-				default: '',
-				description: 'The due date of the invoice',
-			},
-			{
-				displayName: 'Notes',
-				name: 'notes',
-				type: 'string',
-				typeOptions: {
-					rows: 4,
-				},
-				default: '',
-				description: 'Additional notes for the invoice',
-			},
-			{
-				displayName: 'Status',
-				name: 'status',
-				type: 'options',
-				options: [
-					{
-						name: 'Draft',
-						value: 'draft',
-					},
-					{
-						name: 'Sent',
-						value: 'sent',
-					},
-					{
-						name: 'Paid',
-						value: 'paid',
-					},
-				],
-				default: 'draft',
-				description: 'The status of the invoice',
 			},
 		],
 	},

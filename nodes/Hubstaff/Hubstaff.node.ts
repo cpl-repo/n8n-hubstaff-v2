@@ -27,9 +27,7 @@ import type {
 	IHubstaffProjectBody,
 	IHubstaffTaskBody,
 	IHubstaffClientBody,
-	IHubstaffInvoiceBody,
 	IHubstaffScheduleBody,
-	IHubstaffNoteBody,
 	IHubstaffTodoBody,
 	IAdditionalFields,
 	IUpdateFields,
@@ -188,7 +186,8 @@ export class Hubstaff implements INodeType {
 				else if (resource === 'project') {
 					if (operation === 'get') {
 							const projectId = this.getNodeParameter('projectId', i) as string;
-						const endpoint = `/organizations/${organizationId}/projects/${projectId}`;
+						// OpenAPI: GET /v2/projects/{project_id}
+						const endpoint = `/projects/${projectId}`;
 						const responseData = await hubstaffApiRequest.call(this, 'GET', endpoint);
 						returnData.push({ json: responseData });
 					} else if (operation === 'getAll') {
@@ -223,7 +222,8 @@ export class Hubstaff implements INodeType {
 						returnData.push({ json: responseData });
 					} else if (operation === 'update') {
 							const projectId = this.getNodeParameter('projectId', i) as string;
-						const endpoint = `/organizations/${organizationId}/projects/${projectId}`;
+						// OpenAPI: PUT /v2/projects/{project_id}
+						const endpoint = `/projects/${projectId}`;
 
 						const updateFields = this.getNodeParameter('updateFields', i, {}) as IUpdateFields;
 						const body: IHubstaffProjectBody = {};
@@ -240,29 +240,31 @@ export class Hubstaff implements INodeType {
 
 						const responseData = await hubstaffApiRequest.call(this, 'PUT', endpoint, body);
 						returnData.push({ json: responseData });
-					} else if (operation === 'delete') {
-							const projectId = this.getNodeParameter('projectId', i) as string;
-						const endpoint = `/organizations/${organizationId}/projects/${projectId}`;
-						await hubstaffApiRequest.call(this, 'DELETE', endpoint);
-						returnData.push({ json: { success: true, projectId, organizationId } });
 					}
 				}
 
 				// ==================== ACTIVITY ====================
 				else if (resource === 'activity') {
 					if (operation === 'getAll') {
-							const startDate = this.getNodeParameter('startDate', i) as string;
+						const startDate = this.getNodeParameter('startDate', i) as string;
 						const stopDate = this.getNodeParameter('stopDate', i) as string;
 
 						const additionalFields = this.getNodeParameter('additionalFields', i, {}) as IAdditionalFields;
-						const endpoint = additionalFields.useDaily
+						const useDaily = additionalFields.useDaily;
+						const endpoint = useDaily
 							? `/organizations/${organizationId}/activities/daily`
 							: `/organizations/${organizationId}/activities`;
 
-						const qs: IHubstaffQueryParameters = {
-							'date[start]': formatDate(startDate),
-							'date[stop]': formatDate(stopDate),
-						};
+						// Daily endpoint uses date[start/stop], regular uses time_slot[start/stop]
+						const qs: IHubstaffQueryParameters = useDaily
+							? {
+								'date[start]': formatDate(startDate),
+								'date[stop]': formatDate(stopDate),
+							}
+							: {
+								'time_slot[start]': new Date(startDate).toISOString(),
+								'time_slot[stop]': new Date(stopDate).toISOString(),
+							};
 
 						if (additionalFields.userIds) {
 							qs.user_ids = additionalFields.userIds;
@@ -279,24 +281,23 @@ export class Hubstaff implements INodeType {
 					}
 				}
 
-				// ==================== TIME ENTRY ====================
+				// ==================== TIME ENTRY (Timesheets) ====================
 				else if (resource === 'timeEntry') {
 					if (operation === 'getAll') {
-							const startDate = this.getNodeParameter('startDate', i) as string;
+						const startDate = this.getNodeParameter('startDate', i) as string;
 						const stopDate = this.getNodeParameter('stopDate', i) as string;
-						const endpoint = `/organizations/${organizationId}/time_entries`;
+						// OpenAPI: GET /v2/organizations/{org_id}/timesheets
+						const endpoint = `/organizations/${organizationId}/timesheets`;
 
+						// Timesheets use date[start/stop] in YYYY-MM-DD format
 						const qs: IHubstaffQueryParameters = {
 							'date[start]': formatDate(startDate),
 							'date[stop]': formatDate(stopDate),
 						};
 
 						const additionalFields = this.getNodeParameter('additionalFields', i, {}) as IAdditionalFields;
-						if (additionalFields.userIds) {
-							qs.user_ids = additionalFields.userIds;
-						}
-						if (additionalFields.projectIds) {
-							qs.project_ids = additionalFields.projectIds;
+						if (additionalFields.status) {
+							qs.status = additionalFields.status;
 						}
 						if (additionalFields.page) {
 							qs.page = additionalFields.page;
@@ -365,12 +366,14 @@ export class Hubstaff implements INodeType {
 				else if (resource === 'task') {
 					if (operation === 'get') {
 							const taskId = this.getNodeParameter('taskId', i) as string;
-						const endpoint = `/organizations/${organizationId}/tasks/${taskId}`;
+						// OpenAPI: GET /v2/tasks/{task_id}
+						const endpoint = `/tasks/${taskId}`;
 						const responseData = await hubstaffApiRequest.call(this, 'GET', endpoint);
 						returnData.push({ json: responseData });
 					} else if (operation === 'getAll') {
 							const projectId = this.getNodeParameter('projectId', i) as string;
-						const endpoint = `/organizations/${organizationId}/projects/${projectId}/tasks`;
+						// OpenAPI: GET /v2/projects/{project_id}/tasks
+						const endpoint = `/projects/${projectId}/tasks`;
 
 						const qs: IHubstaffQueryParameters = {};
 						const filters = this.getNodeParameter('filters', i, {}) as IFilterFields;
@@ -390,7 +393,8 @@ export class Hubstaff implements INodeType {
 					} else if (operation === 'create') {
 							const projectId = this.getNodeParameter('projectId', i) as string;
 						const summary = this.getNodeParameter('summary', i) as string;
-						const endpoint = `/organizations/${organizationId}/projects/${projectId}/tasks`;
+						// OpenAPI: POST /v2/projects/{project_id}/tasks
+						const endpoint = `/projects/${projectId}/tasks`;
 
 						const body: IHubstaffTaskBody = { summary };
 						const additionalFields = this.getNodeParameter('additionalFields', i, {}) as IAdditionalFields;
@@ -409,7 +413,8 @@ export class Hubstaff implements INodeType {
 						returnData.push({ json: responseData });
 					} else if (operation === 'update') {
 							const taskId = this.getNodeParameter('taskId', i) as string;
-						const endpoint = `/organizations/${organizationId}/tasks/${taskId}`;
+						// OpenAPI: PUT /v2/tasks/{task_id}
+						const endpoint = `/tasks/${taskId}`;
 
 						const updateFields = this.getNodeParameter('updateFields', i, {}) as IUpdateFields;
 						const body: IHubstaffTaskBody = {};
@@ -434,22 +439,24 @@ export class Hubstaff implements INodeType {
 						returnData.push({ json: responseData });
 					} else if (operation === 'delete') {
 							const taskId = this.getNodeParameter('taskId', i) as string;
-						const endpoint = `/organizations/${organizationId}/tasks/${taskId}`;
+						// OpenAPI: DELETE /v2/tasks/{task_id}
+						const endpoint = `/tasks/${taskId}`;
 						await hubstaffApiRequest.call(this, 'DELETE', endpoint);
-						returnData.push({ json: { success: true, taskId, organizationId } });
+						returnData.push({ json: { success: true, taskId } });
 					}
 				}
 
 				// ==================== SCREENSHOT ====================
 				else if (resource === 'screenshot') {
 					if (operation === 'getAll') {
-							const startDate = this.getNodeParameter('startDate', i) as string;
+						const startDate = this.getNodeParameter('startDate', i) as string;
 						const stopDate = this.getNodeParameter('stopDate', i) as string;
 						const endpoint = `/organizations/${organizationId}/screenshots`;
 
+						// Screenshots use time_slot[start/stop] with ISO datetime
 						const qs: IHubstaffQueryParameters = {
-							'date[start]': formatDate(startDate),
-							'date[stop]': formatDate(stopDate),
+							'time_slot[start]': new Date(startDate).toISOString(),
+							'time_slot[stop]': new Date(stopDate).toISOString(),
 						};
 
 						const additionalFields = this.getNodeParameter('additionalFields', i, {}) as IAdditionalFields;
@@ -472,51 +479,33 @@ export class Hubstaff implements INodeType {
 				else if (resource === 'note') {
 					if (operation === 'get') {
 							const noteId = this.getNodeParameter('noteId', i) as string;
-						const endpoint = `/organizations/${organizationId}/notes/${noteId}`;
+						// OpenAPI: GET /v2/notes/{note_id}
+						const endpoint = `/notes/${noteId}`;
 						const responseData = await hubstaffApiRequest.call(this, 'GET', endpoint);
 						returnData.push({ json: responseData });
 					} else if (operation === 'getAll') {
-							const endpoint = `/organizations/${organizationId}/notes`;
+						// OpenAPI: GET /v2/organizations/{org_id}/notes - requires time_slot params
+						const startDate = this.getNodeParameter('startDate', i) as string;
+						const stopDate = this.getNodeParameter('stopDate', i) as string;
+						const endpoint = `/organizations/${organizationId}/notes`;
 
-						const qs: IHubstaffQueryParameters = {};
-						const filters = this.getNodeParameter('filters', i, {}) as IFilterFields;
+						const qs: IHubstaffQueryParameters = {
+							'time_slot[start]': new Date(startDate).toISOString(),
+							'time_slot[stop]': new Date(stopDate).toISOString(),
+						};
+						const additionalFields = this.getNodeParameter('additionalFields', i, {}) as IAdditionalFields;
 
-						if (filters.startDate) {
-							qs['date[start]'] = formatDate(filters.startDate);
+						if (additionalFields.userIds) {
+							qs.user_ids = additionalFields.userIds;
 						}
-						if (filters.endDate) {
-							qs['date[stop]'] = formatDate(filters.endDate);
+						if (additionalFields.projectIds) {
+							qs.project_ids = additionalFields.projectIds;
 						}
-						if (filters.userIds) {
-							qs.user_ids = filters.userIds;
-						}
-						if (filters.projectIds) {
-							qs.project_ids = filters.projectIds;
-						}
-						if (filters.page) {
-							qs.page = filters.page;
+						if (additionalFields.page) {
+							qs.page = additionalFields.page;
 						}
 
 						const responseData = await hubstaffApiRequest.call(this, 'GET', endpoint, {}, qs);
-						returnData.push({ json: responseData });
-					} else if (operation === 'create') {
-							const description = this.getNodeParameter('description', i) as string;
-						const endpoint = `/organizations/${organizationId}/notes`;
-
-						const body: IHubstaffNoteBody = { description };
-						const additionalFields = this.getNodeParameter('additionalFields', i, {}) as IAdditionalFields;
-
-						if (additionalFields.userId) {
-							body.user_id = additionalFields.userId;
-						}
-						if (additionalFields.projectId) {
-							body.project_id = additionalFields.projectId;
-						}
-						if (additionalFields.taskId) {
-							body.task_id = additionalFields.taskId;
-						}
-
-						const responseData = await hubstaffApiRequest.call(this, 'POST', endpoint, body);
 						returnData.push({ json: responseData });
 					}
 				}
@@ -525,7 +514,8 @@ export class Hubstaff implements INodeType {
 				else if (resource === 'client') {
 					if (operation === 'get') {
 							const clientId = this.getNodeParameter('clientId', i) as string;
-						const endpoint = `/organizations/${organizationId}/clients/${clientId}`;
+						// OpenAPI: GET /v2/clients/{client_id}
+						const endpoint = `/clients/${clientId}`;
 						const responseData = await hubstaffApiRequest.call(this, 'GET', endpoint);
 						returnData.push({ json: responseData });
 					} else if (operation === 'getAll') {
@@ -567,7 +557,8 @@ export class Hubstaff implements INodeType {
 						returnData.push({ json: responseData });
 					} else if (operation === 'update') {
 							const clientId = this.getNodeParameter('clientId', i) as string;
-						const endpoint = `/organizations/${organizationId}/clients/${clientId}`;
+						// OpenAPI: PUT /v2/clients/{client_id}
+						const endpoint = `/clients/${clientId}`;
 
 						const updateFields = this.getNodeParameter('updateFields', i, {}) as IUpdateFields;
 						const body: IHubstaffClientBody = {};
@@ -593,168 +584,91 @@ export class Hubstaff implements INodeType {
 
 						const responseData = await hubstaffApiRequest.call(this, 'PUT', endpoint, body);
 						returnData.push({ json: responseData });
-					} else if (operation === 'delete') {
-							const clientId = this.getNodeParameter('clientId', i) as string;
-						const endpoint = `/organizations/${organizationId}/clients/${clientId}`;
-						await hubstaffApiRequest.call(this, 'DELETE', endpoint);
-						returnData.push({ json: { success: true, clientId, organizationId } });
 					}
 				}
 
-				// ==================== INVOICE ====================
+				// ==================== INVOICE (Client Invoices) ====================
 				else if (resource === 'invoice') {
-					if (operation === 'get') {
-							const invoiceId = this.getNodeParameter('invoiceId', i) as string;
-						const endpoint = `/organizations/${organizationId}/invoices/${invoiceId}`;
-						const responseData = await hubstaffApiRequest.call(this, 'GET', endpoint);
-						returnData.push({ json: responseData });
-					} else if (operation === 'getAll') {
-							const endpoint = `/organizations/${organizationId}/invoices`;
+					if (operation === 'getAll') {
+						// OpenAPI: GET /v2/organizations/{org_id}/client_invoices
+						const endpoint = `/organizations/${organizationId}/client_invoices`;
 
 						const qs: IHubstaffQueryParameters = {};
-						const filters = this.getNodeParameter('filters', i, {}) as IFilterFields;
-
-						if (filters.clientId) {
-							qs.client_id = filters.clientId;
-						}
-						if (filters.status && filters.status !== 'all') {
-							qs.status = filters.status;
-						}
-						if (filters.startDate) {
-							qs['date[start]'] = formatDate(filters.startDate);
-						}
-						if (filters.endDate) {
-							qs['date[stop]'] = formatDate(filters.endDate);
-						}
-						if (filters.page) {
-							qs.page = filters.page;
-						}
-
-						const responseData = await hubstaffApiRequest.call(this, 'GET', endpoint, {}, qs);
-						returnData.push({ json: responseData });
-					} else if (operation === 'create') {
-							const clientId = this.getNodeParameter('clientId', i) as string;
-						const endpoint = `/organizations/${organizationId}/invoices`;
-
-						const body: IHubstaffInvoiceBody = { client_id: clientId };
 						const additionalFields = this.getNodeParameter('additionalFields', i, {}) as IAdditionalFields;
 
-						if (additionalFields.invoiceNumber) {
-							body.invoice_number = additionalFields.invoiceNumber;
+						if (additionalFields.clientIds) {
+							qs.client_ids = additionalFields.clientIds;
 						}
-						if (additionalFields.issueDate) {
-							body.issue_date = formatDate(additionalFields.issueDate);
+						if (additionalFields.status) {
+							qs.status = additionalFields.status;
 						}
-						if (additionalFields.dueDate) {
-							body.due_date = formatDate(additionalFields.dueDate);
+						if (additionalFields.issueDateStart) {
+							qs['issue_date[start]'] = formatDate(additionalFields.issueDateStart);
 						}
-						if (additionalFields.notes) {
-							body.notes = additionalFields.notes;
+						if (additionalFields.issueDateStop) {
+							qs['issue_date[stop]'] = formatDate(additionalFields.issueDateStop);
 						}
-						if (additionalFields.projectIds) {
-							body.project_ids = additionalFields.projectIds;
+						if (additionalFields.includeLineItems) {
+							qs.include_line_items = additionalFields.includeLineItems;
 						}
-						if (additionalFields.startDate) {
-							body.start_date = formatDate(additionalFields.startDate);
-						}
-						if (additionalFields.endDate) {
-							body.end_date = formatDate(additionalFields.endDate);
+						if (additionalFields.page) {
+							qs.page = additionalFields.page;
 						}
 
-						const responseData = await hubstaffApiRequest.call(this, 'POST', endpoint, body);
+						const responseData = await hubstaffApiRequest.call(this, 'GET', endpoint, {}, qs);
 						returnData.push({ json: responseData });
-					} else if (operation === 'update') {
-							const invoiceId = this.getNodeParameter('invoiceId', i) as string;
-						const endpoint = `/organizations/${organizationId}/invoices/${invoiceId}`;
-
-						const updateFields = this.getNodeParameter('updateFields', i, {}) as IUpdateFields;
-						const body: IHubstaffInvoiceBody = {};
-
-						if (updateFields.invoiceNumber) {
-							body.invoice_number = updateFields.invoiceNumber;
-						}
-						if (updateFields.issueDate) {
-							body.issue_date = formatDate(updateFields.issueDate);
-						}
-						if (updateFields.dueDate) {
-							body.due_date = formatDate(updateFields.dueDate);
-						}
-						if (updateFields.notes !== undefined) {
-							body.notes = updateFields.notes;
-						}
-						if (updateFields.status) {
-							body.status = updateFields.status;
-						}
-
-						const responseData = await hubstaffApiRequest.call(this, 'PUT', endpoint, body);
-						returnData.push({ json: responseData });
-					} else if (operation === 'delete') {
-							const invoiceId = this.getNodeParameter('invoiceId', i) as string;
-						const endpoint = `/organizations/${organizationId}/invoices/${invoiceId}`;
-						await hubstaffApiRequest.call(this, 'DELETE', endpoint);
-						returnData.push({ json: { success: true, invoiceId, organizationId } });
 					}
 				}
 
-				// ==================== SCHEDULE ====================
+				// ==================== SCHEDULE (Attendance Schedules) ====================
 				else if (resource === 'schedule') {
-					if (operation === 'get') {
-							const scheduleId = this.getNodeParameter('scheduleId', i) as string;
-						const endpoint = `/organizations/${organizationId}/schedules/${scheduleId}`;
-						const responseData = await hubstaffApiRequest.call(this, 'GET', endpoint);
-						returnData.push({ json: responseData });
-					} else if (operation === 'getAll') {
-							const endpoint = `/organizations/${organizationId}/schedules`;
+					if (operation === 'getAll') {
+						// OpenAPI: GET /v2/organizations/{org_id}/attendance_schedules
+						const startDate = this.getNodeParameter('startDate', i) as string;
+						const stopDate = this.getNodeParameter('stopDate', i) as string;
+						const endpoint = `/organizations/${organizationId}/attendance_schedules`;
 
-						const qs: IHubstaffQueryParameters = {};
-						const filters = this.getNodeParameter('filters', i, {}) as IFilterFields;
+						const qs: IHubstaffQueryParameters = {
+							'date[start]': formatDate(startDate),
+							'date[stop]': formatDate(stopDate),
+						};
+						const additionalFields = this.getNodeParameter('additionalFields', i, {}) as IAdditionalFields;
 
-						if (filters.userId) {
-							qs.user_ids = filters.userId;
-						}
-						if (filters.startDate) {
-							qs['date[start]'] = formatDate(filters.startDate);
-						}
-						if (filters.endDate) {
-							qs['date[stop]'] = formatDate(filters.endDate);
-						}
-						if (filters.page) {
-							qs.page = filters.page;
+						if (additionalFields.page) {
+							qs.page = additionalFields.page;
 						}
 
 						const responseData = await hubstaffApiRequest.call(this, 'GET', endpoint, {}, qs);
 						returnData.push({ json: responseData });
 					} else if (operation === 'create') {
-							const userId = this.getNodeParameter('userId', i) as string;
+						// OpenAPI: POST /v2/organizations/{org_id}/attendance_schedules
+						const userId = this.getNodeParameter('userId', i) as string;
+						const scheduleDate = this.getNodeParameter('scheduleDate', i) as string;
 						const startTime = this.getNodeParameter('startTime', i) as string;
 						const endTime = this.getNodeParameter('endTime', i) as string;
-						const endpoint = `/organizations/${organizationId}/schedules`;
+						const endpoint = `/organizations/${organizationId}/attendance_schedules`;
 
 						const body: IHubstaffScheduleBody = {
 							user_id: userId,
+							date: formatDate(scheduleDate),
 							start_time: startTime,
 							end_time: endTime,
 						};
 						const additionalFields = this.getNodeParameter('additionalFields', i, {}) as IAdditionalFields;
 
-						if (additionalFields.projectId) {
-							body.project_id = additionalFields.projectId;
+						if (additionalFields.repeatSchedule && additionalFields.repeatSchedule !== 'none') {
+							body.repeat_schedule = additionalFields.repeatSchedule;
 						}
-						if (additionalFields.taskId) {
-							body.task_id = additionalFields.taskId;
-						}
-						if (additionalFields.notes) {
-							body.notes = additionalFields.notes;
-						}
-						if (additionalFields.repeat) {
-							body.repeat = additionalFields.repeat;
+						if (additionalFields.weekdays) {
+							body.weekdays = additionalFields.weekdays;
 						}
 
 						const responseData = await hubstaffApiRequest.call(this, 'POST', endpoint, body);
 						returnData.push({ json: responseData });
 					} else if (operation === 'update') {
-							const scheduleId = this.getNodeParameter('scheduleId', i) as string;
-						const endpoint = `/organizations/${organizationId}/schedules/${scheduleId}`;
+						// OpenAPI: PUT /v2/attendance_schedules/{attendance_schedule_id}
+						const scheduleId = this.getNodeParameter('scheduleId', i) as string;
+						const endpoint = `/attendance_schedules/${scheduleId}`;
 
 						const updateFields = this.getNodeParameter('updateFields', i, {}) as IUpdateFields;
 						const body: IHubstaffScheduleBody = {};
@@ -765,125 +679,82 @@ export class Hubstaff implements INodeType {
 						if (updateFields.endTime) {
 							body.end_time = updateFields.endTime;
 						}
-						if (updateFields.projectId) {
-							body.project_id = updateFields.projectId;
-						}
-						if (updateFields.taskId) {
-							body.task_id = updateFields.taskId;
-						}
-						if (updateFields.notes !== undefined) {
-							body.notes = updateFields.notes;
-						}
 
 						const responseData = await hubstaffApiRequest.call(this, 'PUT', endpoint, body);
 						returnData.push({ json: responseData });
-					} else if (operation === 'delete') {
-							const scheduleId = this.getNodeParameter('scheduleId', i) as string;
-						const endpoint = `/organizations/${organizationId}/schedules/${scheduleId}`;
-						await hubstaffApiRequest.call(this, 'DELETE', endpoint);
-						returnData.push({ json: { success: true, scheduleId, organizationId } });
 					}
 				}
 
-				// ==================== TO-DO ====================
+				// ==================== TO-DO (Global Todos) ====================
 				else if (resource === 'todo') {
-					if (operation === 'get') {
-							const todoId = this.getNodeParameter('todoId', i) as string;
-						const endpoint = `/organizations/${organizationId}/todos/${todoId}`;
-						const responseData = await hubstaffApiRequest.call(this, 'GET', endpoint);
-						returnData.push({ json: responseData });
-					} else if (operation === 'getAll') {
-							const endpoint = `/organizations/${organizationId}/todos`;
+					if (operation === 'getAll') {
+						// OpenAPI: GET /v2/organizations/{org_id}/global_todos
+						const endpoint = `/organizations/${organizationId}/global_todos`;
 
 						const qs: IHubstaffQueryParameters = {};
-						const filters = this.getNodeParameter('filters', i, {}) as IFilterFields;
+						const additionalFields = this.getNodeParameter('additionalFields', i, {}) as IAdditionalFields;
 
-						if (filters.userId) {
-							qs.user_ids = filters.userId;
-						}
-						if (filters.projectId) {
-							qs.project_ids = filters.projectId;
-						}
-						if (filters.status && filters.status !== 'all') {
-							qs.status = filters.status;
-						}
-						if (filters.page) {
-							qs.page = filters.page;
+						if (additionalFields.page) {
+							qs.page = additionalFields.page;
 						}
 
 						const responseData = await hubstaffApiRequest.call(this, 'GET', endpoint, {}, qs);
 						returnData.push({ json: responseData });
 					} else if (operation === 'create') {
-							const title = this.getNodeParameter('title', i) as string;
-						const endpoint = `/organizations/${organizationId}/todos`;
+						// OpenAPI: POST /v2/organizations/{org_id}/global_todos
+						const name = this.getNodeParameter('name', i) as string;
+						const endpoint = `/organizations/${organizationId}/global_todos`;
 
-						const body: IHubstaffTodoBody = { title };
+						const body: IHubstaffTodoBody = { name };
 						const additionalFields = this.getNodeParameter('additionalFields', i, {}) as IAdditionalFields;
 
-						if (additionalFields.description) {
-							body.description = additionalFields.description;
-						}
-						if (additionalFields.userId) {
-							body.user_id = additionalFields.userId;
-						}
-						if (additionalFields.projectId) {
-							body.project_id = additionalFields.projectId;
-						}
-						if (additionalFields.dueAt) {
-							body.due_at = formatDate(additionalFields.dueAt);
-						}
-						if (additionalFields.priority) {
-							body.priority = additionalFields.priority;
+						if (additionalFields.projectIds) {
+							body.project_ids = additionalFields.projectIds;
 						}
 
 						const responseData = await hubstaffApiRequest.call(this, 'POST', endpoint, body);
 						returnData.push({ json: responseData });
 					} else if (operation === 'update') {
-							const todoId = this.getNodeParameter('todoId', i) as string;
-						const endpoint = `/organizations/${organizationId}/todos/${todoId}`;
+						// OpenAPI: PUT /v2/organizations/{org_id}/global_todos/{id}
+						const todoId = this.getNodeParameter('todoId', i) as string;
+						const endpoint = `/organizations/${organizationId}/global_todos/${todoId}`;
 
 						const updateFields = this.getNodeParameter('updateFields', i, {}) as IUpdateFields;
 						const body: IHubstaffTodoBody = {};
 
-						if (updateFields.title) {
-							body.title = updateFields.title;
+						if (updateFields.name) {
+							body.name = updateFields.name;
 						}
-						if (updateFields.description !== undefined) {
-							body.description = updateFields.description;
+						if (updateFields.addProjectIds) {
+							body.add_project_ids = updateFields.addProjectIds;
 						}
-						if (updateFields.userId) {
-							body.user_id = updateFields.userId;
-						}
-						if (updateFields.status) {
-							body.status = updateFields.status;
-						}
-						if (updateFields.dueAt) {
-							body.due_at = formatDate(updateFields.dueAt);
-						}
-						if (updateFields.priority) {
-							body.priority = updateFields.priority;
+						if (updateFields.removeProjectIds) {
+							body.remove_project_ids = updateFields.removeProjectIds;
 						}
 
 						const responseData = await hubstaffApiRequest.call(this, 'PUT', endpoint, body);
 						returnData.push({ json: responseData });
 					} else if (operation === 'delete') {
-							const todoId = this.getNodeParameter('todoId', i) as string;
-						const endpoint = `/organizations/${organizationId}/todos/${todoId}`;
+						// OpenAPI: DELETE /v2/organizations/{org_id}/global_todos/{id}
+						const todoId = this.getNodeParameter('todoId', i) as string;
+						const endpoint = `/organizations/${organizationId}/global_todos/${todoId}`;
 						await hubstaffApiRequest.call(this, 'DELETE', endpoint);
-						returnData.push({ json: { success: true, todoId, organizationId } });
+						returnData.push({ json: { success: true, todoId } });
 					}
 				}
 
-				// ==================== APPLICATION ====================
+				// ==================== APPLICATION (Tool Usages) ====================
 				else if (resource === 'application') {
 					if (operation === 'getAll') {
-							const startDate = this.getNodeParameter('startDate', i) as string;
+						const startDate = this.getNodeParameter('startDate', i) as string;
 						const stopDate = this.getNodeParameter('stopDate', i) as string;
-						const endpoint = `/organizations/${organizationId}/activities/applications`;
+						// OpenAPI: GET /v2/organizations/{org_id}/tool_usages
+						const endpoint = `/organizations/${organizationId}/tool_usages`;
 
+						// Tool usages use time_slot[start/stop] with ISO datetime
 						const qs: IHubstaffQueryParameters = {
-							'date[start]': formatDate(startDate),
-							'date[stop]': formatDate(stopDate),
+							'time_slot[start]': new Date(startDate).toISOString(),
+							'time_slot[stop]': new Date(stopDate).toISOString(),
 						};
 
 						const additionalFields = this.getNodeParameter('additionalFields', i, {}) as IAdditionalFields;
@@ -902,16 +773,19 @@ export class Hubstaff implements INodeType {
 					}
 				}
 
-				// ==================== URL ====================
+				// ==================== URL (Tool Usages filtered by URL type) ====================
 				else if (resource === 'url') {
 					if (operation === 'getAll') {
-							const startDate = this.getNodeParameter('startDate', i) as string;
+						const startDate = this.getNodeParameter('startDate', i) as string;
 						const stopDate = this.getNodeParameter('stopDate', i) as string;
-						const endpoint = `/organizations/${organizationId}/activities/urls`;
+						// OpenAPI: GET /v2/organizations/{org_id}/tool_usages with tool_type=url
+						const endpoint = `/organizations/${organizationId}/tool_usages`;
 
+						// Tool usages use time_slot[start/stop] with ISO datetime
 						const qs: IHubstaffQueryParameters = {
-							'date[start]': formatDate(startDate),
-							'date[stop]': formatDate(stopDate),
+							'time_slot[start]': new Date(startDate).toISOString(),
+							'time_slot[stop]': new Date(stopDate).toISOString(),
+							'tool_type': 'url',
 						};
 
 						const additionalFields = this.getNodeParameter('additionalFields', i, {}) as IAdditionalFields;

@@ -5,12 +5,18 @@ export interface IHubstaffQueryParameters extends IDataObject {
 	page?: number;
 	'date[start]'?: string;
 	'date[stop]'?: string;
+	'time_slot[start]'?: string;
+	'time_slot[stop]'?: string;
+	'issue_date[start]'?: string;
+	'issue_date[stop]'?: string;
 	user_ids?: string;
 	project_ids?: string;
+	client_ids?: string;
 	include_removed?: boolean;
 	client_id?: string;
 	assignee_id?: string;
 	task_id?: string;
+	include_line_items?: boolean;
 }
 
 export interface IHubstaffProjectBody extends IDataObject {
@@ -51,8 +57,11 @@ export interface IHubstaffInvoiceBody extends IDataObject {
 
 export interface IHubstaffScheduleBody extends IDataObject {
 	user_id?: string;
+	date?: string;
 	start_time?: string;
 	end_time?: string;
+	repeat_schedule?: string;
+	weekdays?: string[];
 	project_id?: string;
 	task_id?: string;
 	notes?: string;
@@ -67,10 +76,14 @@ export interface IHubstaffNoteBody extends IDataObject {
 }
 
 export interface IHubstaffTodoBody extends IDataObject {
+	name?: string;
 	title?: string;
 	description?: string;
 	user_id?: string;
 	project_id?: string;
+	project_ids?: string;
+	add_project_ids?: string;
+	remove_project_ids?: string;
 	due_at?: string;
 	priority?: string;
 	status?: string;
@@ -84,6 +97,7 @@ export interface IAdditionalFields extends IDataObject {
 	useDaily?: boolean;
 	userIds?: string;
 	projectIds?: string;
+	clientIds?: string;
 	includeRemoved?: boolean;
 	assigneeId?: string;
 	dueAt?: string;
@@ -93,6 +107,9 @@ export interface IAdditionalFields extends IDataObject {
 	invoiceNumber?: string;
 	issueDate?: string;
 	dueDate?: string;
+	issueDateStart?: string;
+	issueDateStop?: string;
+	includeLineItems?: boolean;
 	notes?: string;
 	startDate?: string;
 	endDate?: string;
@@ -102,8 +119,11 @@ export interface IAdditionalFields extends IDataObject {
 	startTime?: string;
 	endTime?: string;
 	repeat?: string;
+	repeatSchedule?: string;
+	weekdays?: string[];
 	title?: string;
 	priority?: string;
+	name?: string;
 }
 
 export interface IUpdateFields extends IDataObject {
@@ -127,6 +147,8 @@ export interface IUpdateFields extends IDataObject {
 	title?: string;
 	userId?: string;
 	priority?: string;
+	addProjectIds?: string;
+	removeProjectIds?: string;
 }
 
 export interface IFilterFields extends IDataObject {

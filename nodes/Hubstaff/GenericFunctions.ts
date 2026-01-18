@@ -9,16 +9,18 @@ import type {
 import { NodeApiError, NodeOperationError } from 'n8n-workflow';
 
 // Cache for access tokens (in-memory, per execution)
-const tokenCache: Map<string, { accessToken: string; expiresAt: number }> = new Map();
+const tokenCache: Map<string, { accessToken: string; refreshToken: string; expiresAt: number }> = new Map();
 
 /**
- * Exchange refresh token for access token
+ * Exchange Personal Access Token (refresh token) for access token
+ * Per Hubstaff docs: POST to token_endpoint with grant_type=refresh_token
+ * No client_id or client_secret needed for Personal Access Tokens
  */
 async function getAccessToken(
 	context: IExecuteFunctions | ILoadOptionsFunctions | IHookFunctions,
 	refreshToken: string,
 ): Promise<string> {
-	const cacheKey = refreshToken.substring(0, 20); // Use partial token as cache key
+	const cacheKey = refreshToken.substring(0, 20);
 	const cached = tokenCache.get(cacheKey);
 
 	// Return cached token if still valid (with 5 minute buffer)
@@ -26,35 +28,46 @@ async function getAccessToken(
 		return cached.accessToken;
 	}
 
-	// Exchange refresh token for access token
-	const response = await context.helpers.request({
-		method: 'POST',
-		url: 'https://account.hubstaff.com/access_tokens',
-		headers: {
-			'Content-Type': 'application/x-www-form-urlencoded',
-		},
-		form: {
-			grant_type: 'refresh_token',
-			refresh_token: refreshToken,
-		},
-		json: true,
-	});
+	// Use the latest refresh token (may have been updated from previous exchange)
+	const currentRefreshToken = cached?.refreshToken || refreshToken;
 
-	if (!response.access_token) {
+	try {
+		const response = await context.helpers.httpRequest({
+			method: 'POST',
+			url: 'https://account.hubstaff.com/access_tokens',
+			headers: {
+				'Content-Type': 'application/x-www-form-urlencoded',
+			},
+			body: `grant_type=refresh_token&refresh_token=${encodeURIComponent(currentRefreshToken)}`,
+			returnFullResponse: false,
+		});
+
+		if (!response || !response.access_token) {
+			throw new NodeOperationError(
+				context.getNode(),
+				'Failed to obtain access token from Hubstaff. The response did not contain an access token.',
+			);
+		}
+
+		// Cache the access token and new refresh token
+		const expiresIn = response.expires_in || 86400;
+		tokenCache.set(cacheKey, {
+			accessToken: response.access_token,
+			refreshToken: response.refresh_token || currentRefreshToken,
+			expiresAt: Date.now() + expiresIn * 1000,
+		});
+
+		return response.access_token;
+	} catch (error: any) {
+		// Clear any cached token on error
+		tokenCache.delete(cacheKey);
+
+		const errorMessage = error.message || 'Unknown error during token exchange';
 		throw new NodeOperationError(
 			context.getNode(),
-			'Failed to obtain access token. Please check your Personal Access Token (refresh token).',
+			`Failed to exchange Personal Access Token for access token: ${errorMessage}. Please verify your token is valid and not expired.`,
 		);
 	}
-
-	// Cache the access token
-	const expiresIn = response.expires_in || 3600; // Default to 1 hour
-	tokenCache.set(cacheKey, {
-		accessToken: response.access_token,
-		expiresAt: Date.now() + expiresIn * 1000,
-	});
-
-	return response.access_token;
 }
 
 /**
@@ -79,69 +92,91 @@ export async function hubstaffApiRequest(
 	const credentials = await this.getCredentials('hubstaffApi');
 	const refreshToken = credentials.accessToken as string;
 
+	if (!refreshToken) {
+		throw new NodeOperationError(
+			this.getNode(),
+			'No Personal Access Token configured. Please add your Hubstaff Personal Access Token in the credentials.',
+		);
+	}
+
 	// Get access token (exchanges refresh token if needed)
 	const accessToken = await getAccessToken(this, refreshToken);
 
-	const options: IDataObject = {
+	// Build request options
+	const options: any = {
 		method,
 		url: `https://api.hubstaff.com/v2${endpoint}`,
 		headers: {
-			Authorization: `Bearer ${accessToken}`,
+			'Authorization': `Bearer ${accessToken}`,
+			'Content-Type': 'application/json',
 		},
-		json: true,
+		returnFullResponse: false,
 	};
 
-	if (Object.keys(body).length) {
-		options.body = body;
-	}
-
-	if (Object.keys(qs).length) {
+	// Add query string parameters
+	if (Object.keys(qs).length > 0) {
 		options.qs = qs;
 	}
 
+	// Add body for non-GET requests
+	if (method !== 'GET' && Object.keys(body).length > 0) {
+		options.body = body;
+	}
+
 	try {
-		const response = await this.helpers.request(options);
+		const response = await this.helpers.httpRequest(options);
 		return response;
-	} catch (error) {
-		const errorResponse = error as any;
+	} catch (error: any) {
+		const statusCode = error.statusCode || error.httpCode || error.code;
 
 		// Handle rate limiting
-		if (errorResponse.statusCode === 429) {
-			throw new NodeApiError(this.getNode(), errorResponse as JsonObject, {
+		if (statusCode === 429) {
+			throw new NodeApiError(this.getNode(), error as JsonObject, {
 				message: 'Hubstaff API rate limit exceeded. You are allowed 1,000 requests per hour.',
 				description: 'Please wait before making more requests or reduce the frequency of your workflow.',
 			});
 		}
 
-		// Handle authentication errors - clear cache and retry once
-		if (errorResponse.statusCode === 401) {
+		// Handle authentication errors
+		if (statusCode === 401) {
 			// Clear cached token
 			const cacheKey = refreshToken.substring(0, 20);
 			tokenCache.delete(cacheKey);
 
-			throw new NodeApiError(this.getNode(), errorResponse as JsonObject, {
-				message: 'Authentication failed. Please check your Personal Access Token.',
-				description: 'Your token may be invalid or expired. Generate a new one at https://developer.hubstaff.com/',
+			throw new NodeApiError(this.getNode(), error as JsonObject, {
+				message: 'Authentication failed.',
+				description: 'Your Personal Access Token may be invalid or expired. Generate a new one at https://developer.hubstaff.com/personal_access_tokens',
+			});
+		}
+
+		// Handle forbidden errors
+		if (statusCode === 403) {
+			throw new NodeApiError(this.getNode(), error as JsonObject, {
+				message: 'Access forbidden.',
+				description: 'API access requires an active Hubstaff plan. Please check your subscription.',
 			});
 		}
 
 		// Handle not found errors
-		if (errorResponse.statusCode === 404) {
-			throw new NodeApiError(this.getNode(), errorResponse as JsonObject, {
+		if (statusCode === 404) {
+			throw new NodeApiError(this.getNode(), error as JsonObject, {
 				message: 'Resource not found.',
 				description: 'The requested resource does not exist or you do not have access to it.',
 			});
 		}
 
 		// Handle validation errors
-		if (errorResponse.statusCode === 422) {
-			throw new NodeApiError(this.getNode(), errorResponse as JsonObject, {
+		if (statusCode === 422) {
+			throw new NodeApiError(this.getNode(), error as JsonObject, {
 				message: 'Validation error.',
-				description: errorResponse.message || 'The data provided is invalid. Please check your input.',
+				description: error.message || 'The data provided is invalid. Please check your input.',
 			});
 		}
 
-		throw new NodeApiError(this.getNode(), error as JsonObject);
+		// Re-throw with better error message
+		throw new NodeApiError(this.getNode(), error as JsonObject, {
+			message: `Hubstaff API request failed: ${error.message || 'Unknown error'}`,
+		});
 	}
 }
 
