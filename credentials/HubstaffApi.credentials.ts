@@ -1,6 +1,4 @@
 import type {
-	IAuthenticateGeneric,
-	ICredentialTestRequest,
 	ICredentialType,
 	INodeProperties,
 } from 'n8n-workflow';
@@ -17,7 +15,7 @@ export class HubstaffApi implements ICredentialType {
 			typeOptions: { password: true },
 			default: '',
 			required: true,
-			description: 'Your Hubstaff Personal Access Token. Generate one at https://developer.hubstaff.com/',
+			description: 'Your Hubstaff Personal Access Token (refresh token). Generate one at https://developer.hubstaff.com/personal_access_tokens. Note: This token will be exchanged for an access token automatically.',
 		},
 		{
 			displayName: 'Organization ID',
@@ -28,20 +26,4 @@ export class HubstaffApi implements ICredentialType {
 			description: 'Your Hubstaff Organization ID. Find it in your Hubstaff dashboard URL or via the API.',
 		},
 	];
-
-	authenticate: IAuthenticateGeneric = {
-		type: 'generic',
-		properties: {
-			headers: {
-				Authorization: '=Bearer {{$credentials.accessToken}}',
-			},
-		},
-	};
-
-	test: ICredentialTestRequest = {
-		request: {
-			baseURL: 'https://api.hubstaff.com/v2',
-			url: '/users/me',
-		},
-	};
 }
